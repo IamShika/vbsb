@@ -74,5 +74,6 @@ setInterval(() => { const s = end ? Math.max(0, Math.ceil((end - Date.now()) / 1
 function conn(){ const ws = new WebSocket(WS);
   ws.onmessage = e => { const d = JSON.parse(e.data); if(!d.err) render(d); };
   ws.onclose = () => setTimeout(conn, 1000); }
+  render({t:["HOME","AWAY"],c:["#ff0033","#19c6ff"],rec:["0-0","0-0"],logo:["",""],sc:[[0,0],[0,0],[0,0],[0,0],[0,0]],set:0,to:[0,0],srv:null,hs:false,title:"",timer:true,tmo:2,dur:0,now:0,at:0});
 conn();
 </script></body></html>
