@@ -1,66 +1,83 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Volleyball Control</title>
+<title>แผงควบคุมวอลเลย์บอล</title>
 <style>
-body{margin:0;padding:8px;background:#10151f;color:#eef;font:15px system-ui,sans-serif}
+body{margin:0;padding:8px;background:#10151f;color:#eef;font:15px "Noto Sans Thai",system-ui,sans-serif}
 .g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .c{background:#1a2235;border-radius:8px;padding:10px;margin-bottom:8px}
 h3{margin:0 0 8px;font-size:15px;color:#9bb}
-button{width:100%;padding:14px 6px;border:0;border-radius:6px;background:#2f6bff;color:#fff;font-size:16px;margin-top:6px}
+button{width:100%;padding:14px 6px;border:0;border-radius:6px;background:#2f6bff;color:#fff;font:inherit;font-size:16px;margin-top:6px}
 button:active{filter:brightness(1.4)}
 .x{background:#3b4562}.r{background:#d63a3a}
-input{width:100%;box-sizing:border-box;padding:9px;margin:3px 0;background:#10151f;color:#fff;border:1px solid #334;border-radius:6px}
+input,textarea{width:100%;box-sizing:border-box;padding:9px;margin:3px 0;background:#10151f;color:#fff;border:1px solid #334;border-radius:6px;font:inherit}
+textarea{min-height:130px}
 input[type=color]{height:40px;padding:2px}input[type=checkbox]{width:auto}
 .n{font-size:44px;text-align:center;font-weight:700}
 .l{text-align:center;color:#9bb}
+summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
+#pv{position:relative;overflow:hidden;width:100%;background:#0a0e17}
+#pf{position:absolute;left:0;top:0;width:1100px;height:210px;border:0;transform-origin:0 0}
 #s{position:sticky;top:0;z-index:2;padding:6px;margin:-8px -8px 8px;text-align:center;background:#d63a3a}
 #s.ok{background:#1c9b5a}
 </style></head><body>
 <div id="pin" style="position:fixed;inset:0;z-index:9;background:#10151f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
- <h2 style="margin:0">Enter PIN</h2>
+ <h2 style="margin:0">ใส่รหัส PIN</h2>
  <input id="pi" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" style="width:170px;font-size:34px;text-align:center;letter-spacing:8px"></div>
-<div id="s">Connecting…</div>
+<div id="s">กำลังเชื่อมต่อ…</div>
+
+<div class="c"><details open ontoggle="fit()"><summary>ตัวอย่างสกอร์บอร์ด (สดจากหน้าจอจริง)</summary>
+ <div id="pv"><iframe id="pf" src="../display/"></iframe></div></details></div>
 
 <div class="g" id="teams"></div>
 
 <div class="c"><h3 id="v"></h3>
- <div class="g"><button onclick="S.srv=S.srv==null?0:1-S.srv;send()">Switch</button>
- <button class="x" onclick="S.hs=!S.hs;send()">Hide / show</button></div></div>
+ <div class="g"><button onclick="S.srv=S.srv==null?0:1-S.srv;send()">สลับ</button>
+ <button class="x" onclick="S.hs=!S.hs;send()">ซ่อน / แสดง</button></div></div>
 
 <div class="c"><h3 id="sn"></h3>
- <div class="g"><button onclick="setn(1)">Next set +1</button><button class="x" onclick="setn(-1)">Back -1</button></div></div>
+ <div class="g"><button onclick="setn(1)">เซตถัดไป +1</button><button class="x" onclick="setn(-1)">ย้อนกลับ -1</button></div></div>
 
-<div class="c"><h3>Reset</h3>
- <div class="g"><button class="x" onclick="rs()">Reset current set</button>
- <button class="r" onclick="confirm('Reset all scores, sets and timeouts?')&&ra()">Reset all</button></div>
- <button class="x" onclick="S.ev='r';S.dur=0;S.tid++;send()">Restart timer</button></div>
+<div class="c"><h3>รีเซ็ต</h3>
+ <div class="g"><button class="x" onclick="rs()">รีเซ็ตเซตนี้</button>
+ <button class="r" onclick="confirm('รีเซ็ตคะแนน เซต และไทม์เอาต์ทั้งหมด?')&&ra()">รีเซ็ตทั้งหมด</button></div>
+ <button class="x" onclick="S.ev='r';S.dur=0;S.tid++;send()">เริ่มจับเวลาใหม่</button></div>
 
-<div class="c"><h3>Setup</h3>
+<div class="c"><h3>แบนเนอร์หลายบรรทัด</h3>
+ <label><input type="checkbox" id="ml" onchange="S.ml=this.checked;send()"> เปิดใช้แบนเนอร์หลายบรรทัด</label>
+ <textarea id="ls" placeholder="พิมพ์ 1 บรรทัดต่อ 1 แบนเนอร์" oninput="S.ls=this.value.split('\n').slice(0,50);send()"></textarea>
+ <div class="l" id="lc"></div>
+ สลับทุก (วินาที) <input id="ms" type="number" min="1" oninput="S.ms=Math.max(1,+this.value||5);send()">
+ <label><input type="checkbox" id="as" onchange="S.as=this.checked;send()"> เลื่อนอัตโนมัติ</label>
+ <div class="l">ถ้าปิดเลื่อนอัตโนมัติ ให้กดเปลี่ยนบรรทัดเอง</div>
+ <div class="g"><button class="x" onclick="bn(-1)">◀ บรรทัดก่อนหน้า</button><button class="x" onclick="bn(1)">บรรทัดถัดไป ▶</button></div></div>
+
+<div class="c"><h3>ตั้งค่า</h3>
  <div class="g" id="setup"></div>
- <button class="x" onclick="swap()">Swap sides</button>
- Title <input id="ti" oninput="S.title=this.value;send()">
- <label><input type="checkbox" id="tg" onchange="S.timer=this.checked;send()"> Show timer</label>
- Pause timer after a point (seconds) <input id="ts" type="number" min="1" oninput="S.pz=+this.value||5;send()">
- Timeouts per set <input id="tm" type="number" min="1" max="5" oninput="S.tmo=+this.value||2;send()"></div>
+ <button class="x" onclick="swap()">สลับฝั่ง</button>
+ ข้อความหัวข้อ (แบนเนอร์เดี่ยว) <input id="ti" oninput="S.title=this.value;send()">
+ <label><input type="checkbox" id="tg" onchange="S.timer=this.checked;send()"> แสดงตัวจับเวลา</label>
+ หยุดเวลาหลังได้แต้ม (วินาที) <input id="ts" type="number" min="1" oninput="S.pz=+this.value||5;send()">
+ ไทม์เอาต์ต่อเซต <input id="tm" type="number" min="1" max="5" oninput="S.tmo=+this.value||2;send()"></div>
 
-<script>onerror=function(m){var s=document.getElementById("s");s.textContent="Script error: "+m;s.className="";}</script>
+<script>onerror=function(m){var s=document.getElementById("s");s.textContent="สคริปต์ผิดพลาด: "+m;s.className="";}</script>
 <script>
-const WS = "wss://volley-board.doramongameing.workers.dev"; // <- change after deploying the worker
+const WS = "wss://volley-board.doramongameing.workers.dev";
 const q = id => document.getElementById(id);
 let key = localStorage.k || "", ws, got = 0;
-let S = { t:["HOME","AWAY"], c:["#ff0033","#19c6ff"], rec:["0-0","0-0"], logo:["",""],
-  sc:[[0,0],[0,0],[0,0],[0,0],[0,0]], set:0, to:[0,0], srv:null, hs:false, title:"", timer:true, pz:5, tmo:2, dur:0, tid:0, ev:"r" };
+let S = { t:["เหย้า","เยือน"], c:["#ff0033","#19c6ff"], rec:["",""], logo:["",""],
+  sc:[[0,0],[0,0],[0,0],[0,0],[0,0]], set:0, to:[0,0], srv:null, hs:false, title:"", timer:true, pz:5, tmo:2, dur:0, tid:0, ev:"r",
+  ml:false, ls:[], ms:5, as:true, li:0 };
 
 q("teams").innerHTML = [0,1].map(i => `<div class="c"><h3 id="h${i}"></h3>
- <div class="n" id="p${i}"></div><div class="l">Score</div>
+ <div class="n" id="p${i}"></div><div class="l">คะแนน</div>
  <div class="g"><button onclick="pt(${i},1)">+1</button><button class="x" onclick="pt(${i},-1)">-1</button></div>
  <div class="l" id="o${i}" style="margin-top:10px"></div>
  <div class="g"><button onclick="to(${i},1)">+1</button><button class="x" onclick="to(${i},-1)">-1</button></div></div>`).join("");
-q("setup").innerHTML = [0,1].map(i => `<div>Team ${i+1} name<input id="t${i}" oninput="S.t[${i}]=this.value;send()">
- Record<input id="r${i}" oninput="S.rec[${i}]=this.value;send()">
- Color<input id="c${i}" type="color" oninput="S.c[${i}]=this.value;send()">
- Logo URL<input id="l${i}" placeholder="https://…" oninput="S.logo[${i}]=this.value;send()"></div>`).join("");
+q("setup").innerHTML = [0,1].map(i => `<div>ชื่อทีม ${i+1}<input id="t${i}" oninput="S.t[${i}]=this.value;send()">
+ สถิติ/อันดับ (เว้นว่างได้)<input id="r${i}" oninput="S.rec[${i}]=this.value;send()">
+ สี<input id="c${i}" type="color" oninput="S.c[${i}]=this.value;send()">
+ ลิงก์โลโก้<input id="l${i}" placeholder="https://…" oninput="S.logo[${i}]=this.value;send()"></div>`).join("");
 
 const cur = () => S.sc[S.set];
 function pt(i,d){ const v = cur()[i]+d; if(v<0) return; cur()[i]=v;
@@ -71,22 +88,27 @@ function swap(){ for(const k of ["t","c","rec","logo","to"]) S[k].reverse();
   S.sc.forEach(r=>r.reverse()); if(S.srv!=null) S.srv=1-S.srv; fill(); send(); }
 function rs(){ S.sc[S.set]=[0,0]; S.srv=null; S.dur=0; S.ev="r"; S.tid++; send(); }
 function ra(){ S.sc=S.sc.map(()=>[0,0]); S.set=0; S.to=[0,0]; S.srv=null; S.dur=0; S.ev="r"; S.tid++; send(); }
+function bn(d){ const n = S.ls.filter(x=>x.trim()).length || 1; S.li = ((S.li||0)+d+n) % n; send(); }
 
 function send(){ if(ws&&ws.readyState==1) ws.send(JSON.stringify({key,state:S})); render(); }
 function fill(){ [0,1].forEach(i=>{ q("t"+i).value=S.t[i]; q("r"+i).value=S.rec[i]; q("c"+i).value=S.c[i]; q("l"+i).value=S.logo[i]; });
-  q("ti").value=S.title; q("tg").checked=S.timer; q("ts").value=S.pz||5; q("tm").value=S.tmo; }
-function render(){ [0,1].forEach(i=>{ q("h"+i).textContent=S.t[i]; q("p"+i).textContent=cur()[i]; q("o"+i).textContent=`Timeouts: ${S.to[i]} of ${S.tmo}`; });
-  q("v").textContent = (S.srv==null ? "No team serving" : S.t[S.srv]+" serve") + (S.hs?" (hidden)":"");
-  q("sn").textContent = `Current set: ${S.set+1} of 5`; }
+  q("ti").value=S.title; q("tg").checked=S.timer; q("ts").value=S.pz||5; q("tm").value=S.tmo;
+  q("ml").checked=S.ml; q("ls").value=S.ls.join("\n"); q("ms").value=S.ms; q("as").checked=S.as; }
+function render(){ [0,1].forEach(i=>{ q("h"+i).textContent=S.t[i]; q("p"+i).textContent=cur()[i]; q("o"+i).textContent=`ไทม์เอาต์: ${S.to[i]} จาก ${S.tmo}`; });
+  q("v").textContent = (S.srv==null ? "ยังไม่มีทีมเสิร์ฟ" : S.t[S.srv]+" เสิร์ฟ") + (S.hs?" (ซ่อน)":"");
+  q("sn").textContent = `เซตที่ ${S.set+1} จาก 5`;
+  q("lc").textContent = `${S.ls.filter(x=>x.trim()).length} / 50 บรรทัด`; }
+function fit(){ const w=q("pv"), k=Math.min(1,w.clientWidth/1100); q("pf").style.transform=`scale(${k})`; w.style.height=(210*k)+"px"; }
+addEventListener("resize",fit);
 
 function conn(){ ws = new WebSocket(WS);
-  ws.onopen = () => { q("s").textContent="Live"; q("s").className="ok"; ws.send(JSON.stringify({key,check:1})); };
-  ws.onclose = () => { q("s").textContent="Can't connect to "+WS+" (retrying)"; q("s").className=""; setTimeout(conn,1000); };
+  ws.onopen = () => { q("s").textContent="ออนไลน์"; q("s").className="ok"; ws.send(JSON.stringify({key,check:1})); };
+  ws.onclose = () => { q("s").textContent="เชื่อมต่อ "+WS+" ไม่ได้ (กำลังลองใหม่)"; q("s").className=""; setTimeout(conn,1000); };
   ws.onmessage = e => { const d = JSON.parse(e.data);
     if(d.ok){ if(!got) send(); }
-    else if(d.err){ localStorage.removeItem("k"); alert(d.err==2 ? "Too many wrong tries. Wait 1 minute." : "Wrong PIN"); location.reload(); }
+    else if(d.err){ localStorage.removeItem("k"); alert(d.err==2 ? "ลองผิดหลายครั้งเกินไป รอ 1 นาที" : "PIN ไม่ถูกต้อง"); location.reload(); }
     else if(!got){ got=1; S={...S,...d}; fill(); render(); } }; }
-fill(); render();
+fill(); render(); fit();
 if(key){ q("pin").remove(); conn(); }
 else q("pi").oninput = e => { if(e.target.value.length==4){ key=e.target.value; localStorage.k=key; q("pin").remove(); conn(); } };
 </script></body></html>
