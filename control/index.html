@@ -33,14 +33,15 @@ input[type=color]{height:40px;padding:2px}input[type=checkbox]{width:auto}
 
 <div class="c"><h3>Reset</h3>
  <div class="g"><button class="x" onclick="rs()">Reset current set</button>
- <button class="r" onclick="confirm('Reset all scores, sets and timeouts?')&&ra()">Reset all</button></div></div>
+ <button class="r" onclick="confirm('Reset all scores, sets and timeouts?')&&ra()">Reset all</button></div>
+ <button class="x" onclick="S.ev='r';S.dur=0;S.tid++;send()">Restart timer</button></div>
 
 <div class="c"><h3>Setup</h3>
  <div class="g" id="setup"></div>
  <button class="x" onclick="swap()">Swap sides</button>
  Title <input id="ti" oninput="S.title=this.value;send()">
- <label><input type="checkbox" id="tg" onchange="S.timer=this.checked;send()"> Show timer (restarts after every point)</label>
- Timer seconds <input id="ts" type="number" min="1" oninput="S.secs=+this.value||3;send()">
+ <label><input type="checkbox" id="tg" onchange="S.timer=this.checked;send()"> Show timer</label>
+ Pause timer after a point (seconds) <input id="ts" type="number" min="1" oninput="S.pz=+this.value||5;send()">
  Timeouts per set <input id="tm" type="number" min="1" max="5" oninput="S.tmo=+this.value||2;send()"></div>
 
 <script>onerror=function(m){var s=document.getElementById("s");s.textContent="Script error: "+m;s.className="";}</script>
@@ -49,7 +50,7 @@ const WS = "wss://volley-board.doramongameing.workers.dev"; // <- change after d
 const q = id => document.getElementById(id);
 let key = localStorage.k || "", ws, got = 0;
 let S = { t:["HOME","AWAY"], c:["#ff0033","#19c6ff"], rec:["0-0","0-0"], logo:["",""],
-  sc:[[0,0],[0,0],[0,0],[0,0],[0,0]], set:0, to:[0,0], srv:null, hs:false, title:"", timer:true, secs:3, tmo:2, dur:0, tid:0 };
+  sc:[[0,0],[0,0],[0,0],[0,0],[0,0]], set:0, to:[0,0], srv:null, hs:false, title:"", timer:true, pz:5, tmo:2, dur:0, tid:0, ev:"r" };
 
 q("teams").innerHTML = [0,1].map(i => `<div class="c"><h3 id="h${i}"></h3>
  <div class="n" id="p${i}"></div><div class="l">Score</div>
@@ -63,17 +64,17 @@ q("setup").innerHTML = [0,1].map(i => `<div>Team ${i+1} name<input id="t${i}" on
 
 const cur = () => S.sc[S.set];
 function pt(i,d){ const v = cur()[i]+d; if(v<0) return; cur()[i]=v;
-  if(d>0){ S.srv=i; S.hs=false; if(S.timer){ S.dur=S.secs*1000; S.tid++; } } send(); }
+  if(d>0){ S.srv=i; S.hs=false; S.dur=(S.pz||5)*1000; S.ev="p"; S.tid++; } send(); }
 function to(i,d){ S.to[i]=Math.max(0,Math.min(S.tmo,S.to[i]+d)); send(); }
-function setn(d){ S.set=Math.max(0,Math.min(4,S.set+d)); S.to=[0,0]; S.dur=0; S.tid++; send(); }
+function setn(d){ S.set=Math.max(0,Math.min(4,S.set+d)); S.to=[0,0]; S.dur=0; S.ev="r"; S.tid++; send(); }
 function swap(){ for(const k of ["t","c","rec","logo","to"]) S[k].reverse();
   S.sc.forEach(r=>r.reverse()); if(S.srv!=null) S.srv=1-S.srv; fill(); send(); }
-function rs(){ S.sc[S.set]=[0,0]; S.srv=null; S.dur=0; S.tid++; send(); }
-function ra(){ S.sc=S.sc.map(()=>[0,0]); S.set=0; S.to=[0,0]; S.srv=null; S.dur=0; S.tid++; send(); }
+function rs(){ S.sc[S.set]=[0,0]; S.srv=null; S.dur=0; S.ev="r"; S.tid++; send(); }
+function ra(){ S.sc=S.sc.map(()=>[0,0]); S.set=0; S.to=[0,0]; S.srv=null; S.dur=0; S.ev="r"; S.tid++; send(); }
 
 function send(){ if(ws&&ws.readyState==1) ws.send(JSON.stringify({key,state:S})); render(); }
 function fill(){ [0,1].forEach(i=>{ q("t"+i).value=S.t[i]; q("r"+i).value=S.rec[i]; q("c"+i).value=S.c[i]; q("l"+i).value=S.logo[i]; });
-  q("ti").value=S.title; q("tg").checked=S.timer; q("ts").value=S.secs; q("tm").value=S.tmo; }
+  q("ti").value=S.title; q("tg").checked=S.timer; q("ts").value=S.pz||5; q("tm").value=S.tmo; }
 function render(){ [0,1].forEach(i=>{ q("h"+i).textContent=S.t[i]; q("p"+i).textContent=cur()[i]; q("o"+i).textContent=`Timeouts: ${S.to[i]} of ${S.tmo}`; });
   q("v").textContent = (S.srv==null ? "No team serving" : S.t[S.srv]+" serve") + (S.hs?" (hidden)":"");
   q("sn").textContent = `Current set: ${S.set+1} of 5`; }
@@ -84,7 +85,7 @@ function conn(){ ws = new WebSocket(WS);
   ws.onmessage = e => { const d = JSON.parse(e.data);
     if(d.ok){ if(!got) send(); }
     else if(d.err){ localStorage.removeItem("k"); alert(d.err==2 ? "Too many wrong tries. Wait 1 minute." : "Wrong PIN"); location.reload(); }
-    else if(!got){ got=1; S=d; fill(); render(); } }; }
+    else if(!got){ got=1; S={...S,...d}; fill(); render(); } }; }
 fill(); render();
 if(key){ q("pin").remove(); conn(); }
 else q("pi").oninput = e => { if(e.target.value.length==4){ key=e.target.value; localStorage.k=key; q("pin").remove(); conn(); } };
