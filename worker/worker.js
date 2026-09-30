@@ -4,7 +4,8 @@ const pack = s => JSON.stringify({ ...s, now: Date.now() });
 export class Board {
   constructor(ctx, env) { this.c = ctx; this.e = env; }
 
-  async fetch() {
+  async fetch(req) {
+    if (req.headers.get('Upgrade') !== 'websocket') return new Response('Durable Object OK');
     const [client, server] = Object.values(new WebSocketPair());
     this.c.acceptWebSocket(server);
     const s = await this.c.storage.get('s');
@@ -36,8 +37,14 @@ export class Board {
 }
 
 export default {
-  fetch(req, env) {
-    if (req.headers.get('Upgrade') !== 'websocket') return new Response('Volley board is running');
-    return env.BOARD.get(env.BOARD.idFromName('main')).fetch(req);
+  async fetch(req, env) {
+    const ws = req.headers.get('Upgrade') === 'websocket';
+    const test = new URL(req.url).searchParams.has('test');
+    if (!ws && !test) return new Response('Volley board is running');
+    try {
+      return await env.BOARD.get(env.BOARD.idFromName('main')).fetch(req);
+    } catch (e) {
+      return new Response('Error: ' + e.message, { status: 500 });
+    }
   }
 };
