@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Volleyball Scoreboard</title>
+<style>
+:root{--a:#ff0033;--b:#19c6ff}
+body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","Noto Sans",system-ui,sans-serif}
+#w{width:min(100vw,1100px);margin:0 auto;opacity:0;transition:opacity .6s}
+#tm{width:130px;margin:0 auto;text-align:center;font:700 28px/1.3 inherit;background:#15305c;border-radius:0 0 8px 8px;transition:background .2s}
+#tm.lo{background:#c62828}
+#r{display:flex;align-items:stretch;background:#15305c;border-radius:8px;overflow:hidden;height:76px}
+.t{flex:1;display:flex;align-items:center;gap:10px;padding:0 14px;min-width:0;transition:background .4s}
+#T0{background:var(--a);justify-content:flex-start;flex-direction:row-reverse}
+#T1{background:var(--b)}
+.t img{height:52px;width:52px;object-fit:contain}
+.nm{display:flex;flex-direction:column;min-width:0}
+#T0 .nm{align-items:flex-end}
+.nm b{font-size:34px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm small{font-size:13px;opacity:.85}
+.d{letter-spacing:3px;font-size:12px;height:14px}
+.ball{width:24px;height:24px;border-radius:50%;flex:none;background:radial-gradient(circle at 35% 30%,#ffe34d,#f2b600);box-shadow:inset -3px -3px 0 #c98f00;transition:transform .3s,opacity .3s;transform:scale(0);opacity:0}
+.ball.on{transform:scale(1);opacity:1;animation:bob 1.2s ease-in-out infinite}
+@keyframes bob{50%{translate:0 -5px}}
+.w,.p{display:flex;align-items:center;justify-content:center;font-weight:700}
+.w{width:48px;font-size:26px;background:#0e2244}
+.p{width:92px;font-size:56px;background:#15305c}
+.dash{width:36px;display:flex;align-items:center;justify-content:center;font-size:40px;background:#0e2244}
+.pop{animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(1.5);color:#ffe34d}100%{transform:scale(1)}}
+#ti{text-align:center;font-weight:700;font-size:22px;background:#0e2244;padding:8px;margin-top:4px;border-radius:8px}
+#h{display:flex;justify-content:center;gap:6px;margin-top:6px;flex-wrap:wrap}
+#h div{min-width:92px;text-align:center;padding:6px 10px;border-radius:6px;background:#0e2244;font-weight:700;font-size:20px;opacity:.75}
+#h div.cur{opacity:1;outline:2px solid #ffe34d}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div id="w">
+ <div id="tm">0:00</div>
+ <div id="r">
+  <div class="t" id="T0"><img id="g0"><div class="nm"><b id="n0"></b><small id="c0"></small><span class="d" id="d0"></span></div><i class="ball" id="v0"></i></div>
+  <div class="w" id="w0">0</div><div class="p" id="p0">0</div><div class="dash">-</div><div class="p" id="p1">0</div><div class="w" id="w1">0</div>
+  <div class="t" id="T1"><i class="ball" id="v1"></i><img id="g1"><div class="nm" style="align-items:flex-start"><b id="n1"></b><small id="c1"></small><span class="d" id="d1"></span></div></div>
+ </div>
+ <div id="ti"></div>
+ <div id="h"></div>
+</div>
+<script>
+const WS = "wss://volley-board.YOURNAME.workers.dev"; // <- same address as the control page
+const q = id => document.getElementById(id);
+let end = 0, S = null, prev = {};
+
+function pop(el, v){ if(prev[el.id] !== undefined && prev[el.id] !== v){ el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); } prev[el.id] = v; }
+function set(id, v){ const el = q(id); if(el.textContent !== String(v)) el.textContent = v; pop(el, v); }
+
+function render(d){
+  S = d; document.documentElement.style.setProperty("--a", d.c[0]); document.documentElement.style.setProperty("--b", d.c[1]);
+  let w = [0,0]; d.sc.forEach((r,i) => { if(i < d.set){ if(r[0] > r[1]) w[0]++; else if(r[1] > r[0]) w[1]++; } });
+  [0,1].forEach(i => {
+    set("n"+i, d.t[i]); set("c"+i, d.rec[i]); set("p"+i, d.sc[d.set][i]); set("w"+i, w[i]);
+    q("d"+i).textContent = "●".repeat(Math.max(0, d.tmo - d.to[i])) + "○".repeat(Math.min(d.tmo, d.to[i]));
+    q("g"+i).style.display = d.logo[i] ? "" : "none"; if(d.logo[i] && q("g"+i).src !== d.logo[i]) q("g"+i).src = d.logo[i];
+    q("v"+i).classList.toggle("on", d.srv === i && !d.hs);
+  });
+  q("ti").style.display = d.title ? "" : "none"; q("ti").textContent = d.title;
+  q("tm").style.display = d.timer ? "" : "none";
+  end = d.dur ? Date.now() + Math.max(0, d.dur - (d.now - d.at)) : 0;
+  q("h").innerHTML = d.sc.map((r,i) => i <= d.set && (r[0] || r[1] || i < d.set)
+    ? `<div class="${i === d.set ? "cur" : ""}">${r[0]} - ${r[1]}</div>` : "").join("");
+  q("w").style.opacity = 1;
+}
+
+setInterval(() => { const s = end ? Math.max(0, Math.ceil((end - Date.now()) / 1000)) : 0;
+  q("tm").textContent = "0:" + String(s).padStart(2, "0"); q("tm").classList.toggle("lo", end > 0 && s <= 1); }, 100);
+
+function conn(){ const ws = new WebSocket(WS);
+  ws.onmessage = e => { const d = JSON.parse(e.data); if(!d.err) render(d); };
+  ws.onclose = () => setTimeout(conn, 1000); }
+conn();
+</script></body></html>
