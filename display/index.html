@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Volleyball Scoreboard</title>
 <style>
@@ -7,55 +7,69 @@
 body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","Noto Sans",system-ui,sans-serif;text-shadow:0 1px 6px rgba(0,0,0,.35)}
 #w{width:min(100vw,1100px);margin:0 auto;opacity:0;transition:opacity .6s var(--ez)}
 /* infused glass: blurred backdrop + soft sheen + thin bright edge, square corners */
-#tm,.t,.w,.p,.dash,#ti,#h div{-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5);border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 60%),rgba(12,22,44,.45)}
+#tm,.t,.w,.p,.dash,#ti,#h div{-webkit-backdrop-filter:blur(14px) saturate(1.6) brightness(1.2);backdrop-filter:blur(14px) saturate(1.6) brightness(1.2);border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 60%),rgba(12,22,44,.45)}
 #tm{width:130px;margin:0 auto;text-align:center;font-weight:700;font-size:28px;line-height:1.3;transition:color .3s var(--ez)}
 #tm.pz{color:#ffd54a}
-#r{display:flex;gap:2px;height:76px;margin-top:2px}
+#r{display:flex;height:76px;margin-top:-1px}
+#r>*+*,#h div+div{margin-left:-1px}
 .t{flex:1;display:flex;align-items:center;gap:10px;padding:0 14px;min-width:0}
-#T0{flex-direction:row-reverse;background:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,0) 60%),color-mix(in srgb,var(--a) 62%,transparent)}
-#T1{background:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,0) 60%),color-mix(in srgb,var(--b) 62%,transparent)}
-.t img{height:52px;width:52px;object-fit:contain}
+#T0{flex-direction:row-reverse;background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 55%),color-mix(in srgb,var(--a) 90%,transparent)}
+#T1{background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 55%),color-mix(in srgb,var(--b) 90%,transparent)}
+#g0,#g1{height:52px;width:52px;object-fit:contain}
 .nm{display:flex;flex-direction:column;min-width:0}
 #T0 .nm{align-items:flex-end}
 .nm b{font-size:34px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nm small{font-size:13px;opacity:.9}
 .d{letter-spacing:3px;font-size:12px;height:14px}
-.ball{width:24px;height:24px;border-radius:50%;flex:none;background:radial-gradient(circle at 35% 30%,#ffe34d,#f2b600);box-shadow:inset -3px -3px 0 #c98f00;opacity:0;transform:translateY(14px);transition:opacity .45s var(--ez),transform .55s var(--ez)}
+.ball{width:34px;height:34px;flex:none;object-fit:contain;opacity:0;transform:translateY(14px);transition:opacity .45s var(--ez),transform .55s var(--ez)}
 .ball.on{opacity:1;transform:none}
 .w,.p,.dash{position:relative;overflow:hidden;font-weight:700}
 .w{width:48px;font-size:26px}
 .p{width:92px;font-size:56px}
 .dash{width:36px;display:flex;align-items:center;justify-content:center;font-size:40px}
 .w span,.p span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-#ti{text-align:center;font-weight:700;font-size:22px;padding:8px;margin-top:2px}
-#h{display:flex;justify-content:center;gap:2px;margin-top:2px;flex-wrap:wrap}
+#ti{position:relative;overflow:hidden;height:42px;font-weight:700;font-size:22px;margin-top:-1px}
+#ti span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:0 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#h{display:flex;justify-content:center;margin-top:-1px;flex-wrap:wrap}
 #h div{min-width:92px;text-align:center;padding:6px 10px;font-weight:700;font-size:20px;opacity:.8}
 #h div.cur{opacity:1;border-color:#ffe34d}
 </style></head><body>
 <div id="w">
  <div id="tm">0:00</div>
  <div id="r">
-  <div class="t" id="T0"><img id="g0"><div class="nm"><b id="n0"></b><small id="c0"></small><span class="d" id="d0"></span></div><i class="ball" id="v0"></i></div>
+  <div class="t" id="T0"><img id="g0"><div class="nm"><b id="n0"></b><small id="c0"></small><span class="d" id="d0"></span></div><img class="ball" id="v0" src="../img/vb.png" alt=""></div>
   <div class="w" id="w0"><span>0</span></div><div class="p" id="p0"><span>0</span></div><div class="dash">-</div><div class="p" id="p1"><span>0</span></div><div class="w" id="w1"><span>0</span></div>
-  <div class="t" id="T1"><i class="ball" id="v1"></i><img id="g1"><div class="nm" style="align-items:flex-start"><b id="n1"></b><small id="c1"></small><span class="d" id="d1"></span></div></div>
+  <div class="t" id="T1"><img class="ball" id="v1" src="../img/vb.png" alt=""><img id="g1"><div class="nm" style="align-items:flex-start"><b id="n1"></b><small id="c1"></small><span class="d" id="d1"></span></div></div>
  </div>
- <div id="ti"></div>
+ <div id="ti" style="display:none"><span></span></div>
  <div id="h"></div>
 </div>
 <script>
 const WS = "wss://volley-board.doramongameing.workers.dev";
 const q = id => document.getElementById(id);
 const EZ = "cubic-bezier(0.109,0.575,0.333,0.974)", RM = matchMedia("(prefers-reduced-motion:reduce)").matches;
-let T = { ok: 0 }, first = true;
+let T = { ok: 0 }, first = true, D = null, off = 0, curB = null;
 
 // tally-counter roll: score up = new number rises in; score down = the opposite
-function roll(el, v, skip){
+function roll(el, v, skip, u){
   const old = el.lastElementChild; if(old.textContent == String(v)) return;
   if(skip){ old.textContent = v; return; }
-  const up = +v > +old.textContent, n = document.createElement("span"); n.textContent = v; el.appendChild(n);
+  const up = u === undefined ? +v > +old.textContent : u, n = document.createElement("span"); n.textContent = v; el.appendChild(n);
   const o = { duration: RM ? 0 : 450, easing: EZ, fill: "both" };
   n.animate([{ transform: `translateY(${up ? "100%" : "-100%"})`, opacity: 0 }, { transform: "none", opacity: 1 }], o);
   old.animate([{ transform: "none", opacity: 1 }, { transform: `translateY(${up ? "-100%" : "100%"})`, opacity: 0 }], o).onfinish = () => old.remove();
+}
+// banner: one title, or several lines that rotate on server time so every screen shows the same line
+function banner(d){
+  const L = (d.ls || []).map(x => x.trim()).filter(Boolean);
+  if(!d.ml) return d.title || "";
+  if(!L.length) return "";
+  return L[(d.as ? Math.floor((Date.now() + off) / (1000 * (d.ms || 5))) : (d.li || 0)) % L.length];
+}
+function tickB(skip){
+  if(!D) return; const b = banner(D); if(b === curB) return; curB = b;
+  const el = q("ti"), hid = el.style.display === "none";
+  el.style.display = b ? "" : "none"; if(b) roll(el, b, skip || hid, true);
 }
 function set(id, v){ const el = q(id); if(el.textContent !== String(v)) el.textContent = v; }
 
@@ -63,12 +77,12 @@ function render(d, skip){
   const r = document.documentElement.style; r.setProperty("--a", d.c[0]); r.setProperty("--b", d.c[1]);
   let w = [0,0]; d.sc.forEach((s,i) => { if(i < d.set){ if(s[0] > s[1]) w[0]++; else if(s[1] > s[0]) w[1]++; } });
   [0,1].forEach(i => {
-    set("n"+i, d.t[i]); set("c"+i, d.rec[i]); roll(q("p"+i), d.sc[d.set][i], skip); roll(q("w"+i), w[i], skip);
+    set("n"+i, d.t[i]); set("c"+i, d.rec[i] || ""); q("c"+i).style.display = (d.rec[i] || "").trim() ? "" : "none"; roll(q("p"+i), d.sc[d.set][i], skip); roll(q("w"+i), w[i], skip);
     q("d"+i).textContent = "●".repeat(Math.max(0, d.tmo - d.to[i])) + "○".repeat(Math.min(d.tmo, d.to[i]));
     q("g"+i).style.display = d.logo[i] ? "" : "none"; if(d.logo[i] && q("g"+i).src !== d.logo[i]) q("g"+i).src = d.logo[i];
     q("v"+i).classList.toggle("on", d.srv === i && !d.hs);
   });
-  q("ti").style.display = d.title ? "" : "none"; q("ti").textContent = d.title;
+  if(d.now) off = d.now - Date.now(); D = d; tickB(skip);
   q("tm").style.display = d.timer ? "" : "none";
   T = { ok: !!d.at, ev: d.ev, la: Date.now() - (d.now - d.at), dur: d.dur || 0, fz: d.fz || 0 };
   q("h").innerHTML = d.sc.map((s,i) => i <= d.set && (s[0] || s[1] || i < d.set)
@@ -81,9 +95,9 @@ setInterval(() => { let m = 0, pz = false;
   if(T.ok){ const e = Date.now() - T.la;
     if(T.ev === "p"){ if(e < T.dur){ m = T.fz; pz = true; } else m = e - T.dur; } else m = e; }
   const s = Math.floor(Math.max(0, m) / 1000);
-  q("tm").textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); q("tm").classList.toggle("pz", pz); }, 100);
+  q("tm").textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); q("tm").classList.toggle("pz", pz); tickB(false); }, 100);
 
-render({t:["HOME","AWAY"],c:["#ff0033","#19c6ff"],rec:["0-0","0-0"],logo:["",""],sc:[[0,0],[0,0],[0,0],[0,0],[0,0]],set:0,to:[0,0],srv:null,hs:false,title:"",timer:true,tmo:2,dur:0,ev:"r",now:0,at:0}, true);
+render({t:["เหย้า","เยือน"],c:["#ff0033","#19c6ff"],rec:["",""],ml:false,ls:[],logo:["",""],sc:[[0,0],[0,0],[0,0],[0,0],[0,0]],set:0,to:[0,0],srv:null,hs:false,title:"",timer:true,tmo:2,dur:0,ev:"r",now:0,at:0}, true);
 function conn(){ const ws = new WebSocket(WS);
   ws.onmessage = e => { const d = JSON.parse(e.data); if(!d.err){ render(d, first); first = false; } };
   ws.onclose = () => setTimeout(conn, 1000); }
