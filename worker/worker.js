@@ -28,8 +28,14 @@ export class Board {
     if (d.check) { ws.send('{"ok":1}'); return; } // just verifying the PIN
     const old = (await this.c.storage.get('s')) || {};
     const s = d.state;
-    // timer start time is stamped by the server so every device agrees
-    s.at = s.tid === old.tid ? (old.at || Date.now()) : Date.now();
+    // timer times are stamped by the server so every device agrees
+    if (s.tid === old.tid) { s.at = old.at; s.fz = old.fz; }
+    else {
+      const now = Date.now();
+      let fz = 0; // how long the rally lasted (shown while paused)
+      if (s.ev === 'p' && old.at) fz = Math.max(0, now - (old.ev === 'p' ? old.at + (old.dur || 0) : old.at));
+      s.at = now; s.fz = fz;
+    }
     await this.c.storage.put('s', s);
     const p = pack(s);
     this.c.getWebSockets().forEach(w => w.send(p));
