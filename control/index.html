@@ -44,7 +44,7 @@ input[type=color]{height:40px;padding:2px}input[type=checkbox]{width:auto}
  Timeouts per set <input id="tm" type="number" min="1" max="5" oninput="S.tmo=+this.value||2;send()"></div>
 
 <script>
-const WS = "wss://volley-board.YOURNAME.workers.dev"; // <- change after deploying the worker
+const WS = "wss://volley-board.doramongameing.workers.dev/"; // <- change after deploying the worker
 const q = id => document.getElementById(id);
 let key = localStorage.k || "", ws, got = 0;
 let S = { t:["HOME","AWAY"], c:["#ff0033","#19c6ff"], rec:["0-0","0-0"], logo:["",""],
