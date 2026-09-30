@@ -81,7 +81,7 @@ function conn(){ ws = new WebSocket(WS);
   ws.onopen = () => { q("s").textContent="Live"; q("s").className="ok"; ws.send(JSON.stringify({key,check:1})); };
   ws.onclose = () => { q("s").textContent="Reconnecting…"; q("s").className=""; setTimeout(conn,1000); };
   ws.onmessage = e => { const d = JSON.parse(e.data);
-    if(d.ok){}
+    if(d.ok){ if(!got) send(); }
     else if(d.err){ localStorage.removeItem("k"); alert(d.err==2 ? "Too many wrong tries. Wait 1 minute." : "Wrong PIN"); location.reload(); }
     else if(!got){ got=1; S=d; fill(); render(); } }; }
 fill(); render();
