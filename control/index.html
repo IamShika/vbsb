@@ -43,8 +43,9 @@ input[type=color]{height:40px;padding:2px}input[type=checkbox]{width:auto}
  Timer seconds <input id="ts" type="number" min="1" oninput="S.secs=+this.value||3;send()">
  Timeouts per set <input id="tm" type="number" min="1" max="5" oninput="S.tmo=+this.value||2;send()"></div>
 
+<script>onerror=function(m){var s=document.getElementById("s");s.textContent="Script error: "+m;s.className="";}</script>
 <script>
-const WS = "wss://volley-board.doramongameing.workers.dev/"; // <- change after deploying the worker
+const WS = "wss://volley-board.doramongameing.workers.dev"; // <- change after deploying the worker
 const q = id => document.getElementById(id);
 let key = localStorage.k || "", ws, got = 0;
 let S = { t:["HOME","AWAY"], c:["#ff0033","#19c6ff"], rec:["0-0","0-0"], logo:["",""],
@@ -79,7 +80,7 @@ function render(){ [0,1].forEach(i=>{ q("h"+i).textContent=S.t[i]; q("p"+i).text
 
 function conn(){ ws = new WebSocket(WS);
   ws.onopen = () => { q("s").textContent="Live"; q("s").className="ok"; ws.send(JSON.stringify({key,check:1})); };
-  ws.onclose = () => { q("s").textContent="Reconnecting…"; q("s").className=""; setTimeout(conn,1000); };
+  ws.onclose = () => { q("s").textContent="Can't connect to "+WS+" (retrying)"; q("s").className=""; setTimeout(conn,1000); };
   ws.onmessage = e => { const d = JSON.parse(e.data);
     if(d.ok){ if(!got) send(); }
     else if(d.err){ localStorage.removeItem("k"); alert(d.err==2 ? "Too many wrong tries. Wait 1 minute." : "Wrong PIN"); location.reload(); }
