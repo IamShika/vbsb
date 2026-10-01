@@ -10,7 +10,7 @@ h3{margin:0 0 8px;font-size:15px;color:#9bb}
 button{width:100%;padding:14px 6px;border:0;border-radius:6px;background:#2f6bff;color:#fff;font:inherit;font-size:16px;margin-top:6px}
 button:active{filter:brightness(1.4)}
 .x{background:#3b4562}.r{background:#d63a3a}
-input,textarea{width:100%;box-sizing:border-box;padding:9px;margin:3px 0;background:#10151f;color:#fff;border:1px solid #334;border-radius:6px;font:inherit}
+input,textarea,select{width:100%;box-sizing:border-box;padding:9px;margin:3px 0;background:#10151f;color:#fff;border:1px solid #334;border-radius:6px;font:inherit}
 textarea{min-height:130px}
 input[type=color]{height:40px;padding:2px}input[type=checkbox]{width:auto}
 .n{font-size:44px;text-align:center;font-weight:700}
@@ -45,8 +45,9 @@ summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
 
 <div class="c"><h3>แบนเนอร์หลายบรรทัด</h3>
  <label><input type="checkbox" id="ml" onchange="S.ml=this.checked;send()"> เปิดใช้แบนเนอร์หลายบรรทัด</label>
- <textarea id="ls" placeholder="พิมพ์ 1 บรรทัดต่อ 1 แบนเนอร์" oninput="S.ls=this.value.split('\n').slice(0,50);send()"></textarea>
+ <textarea id="ls" placeholder="พิมพ์ 1 บรรทัดต่อ 1 แบนเนอร์ (ใส่บรรทัดเดียวก็ใช้เป็นหัวข้อได้)" oninput="S.ls=this.value.split('\n').slice(0,50);send()"></textarea>
  <div class="l" id="lc"></div>
+ ฟอนต์แบนเนอร์ <select id="fb" onchange="S.fb=this.value;send()"></select>
  สลับทุก (วินาที) <input id="ms" type="number" min="1" oninput="S.ms=Math.max(1,+this.value||5);send()">
  <label><input type="checkbox" id="as" onchange="S.as=this.checked;send()"> เลื่อนอัตโนมัติ</label>
  <div class="l">ถ้าปิดเลื่อนอัตโนมัติ ให้กดเปลี่ยนบรรทัดเอง</div>
@@ -55,7 +56,7 @@ summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
 <div class="c"><h3>ตั้งค่า</h3>
  <div class="g" id="setup"></div>
  <button class="x" onclick="swap()">สลับฝั่ง</button>
- ข้อความหัวข้อ (แบนเนอร์เดี่ยว) <input id="ti" oninput="S.title=this.value;send()">
+ ฟอนต์ชื่อทีม <select id="fn" onchange="S.fn=this.value;send()"></select>
  <label><input type="checkbox" id="tg" onchange="S.timer=this.checked;send()"> แสดงตัวจับเวลา</label>
  หยุดเวลาหลังได้แต้ม (วินาที) <input id="ts" type="number" min="1" oninput="S.pz=+this.value||5;send()">
  ไทม์เอาต์ต่อเซต <input id="tm" type="number" min="1" max="5" oninput="S.tmo=+this.value||2;send()"></div>
@@ -67,7 +68,8 @@ const q = id => document.getElementById(id);
 let key = localStorage.k || "", ws, got = 0;
 let S = { t:["เหย้า","เยือน"], c:["#ff0033","#19c6ff"], rec:["",""], logo:["",""],
   sc:[[0,0],[0,0],[0,0],[0,0],[0,0]], set:0, to:[0,0], srv:null, hs:false, title:"", timer:true, pz:5, tmo:2, dur:0, tid:0, ev:"r",
-  ml:false, ls:[], ms:5, as:true, li:0 };
+  ml:false, ls:[], ms:5, as:true, li:0, fn:"", fb:"" };
+const REPO = "iamshika/vbsb"; // GitHub user/repo that hosts the /fonts folder
 
 q("teams").innerHTML = [0,1].map(i => `<div class="c"><h3 id="h${i}"></h3>
  <div class="n" id="p${i}"></div><div class="l">คะแนน</div>
@@ -92,7 +94,7 @@ function bn(d){ const n = S.ls.filter(x=>x.trim()).length || 1; S.li = ((S.li||0
 
 function send(){ if(ws&&ws.readyState==1) ws.send(JSON.stringify({key,state:S})); render(); }
 function fill(){ [0,1].forEach(i=>{ q("t"+i).value=S.t[i]; q("r"+i).value=S.rec[i]; q("c"+i).value=S.c[i]; q("l"+i).value=S.logo[i]; });
-  q("ti").value=S.title; q("tg").checked=S.timer; q("ts").value=S.pz||5; q("tm").value=S.tmo;
+  q("fn").value=S.fn||""; q("fb").value=S.fb||""; q("tg").checked=S.timer; q("ts").value=S.pz||5; q("tm").value=S.tmo;
   q("ml").checked=S.ml; q("ls").value=S.ls.join("\n"); q("ms").value=S.ms; q("as").checked=S.as; }
 function render(){ [0,1].forEach(i=>{ q("h"+i).textContent=S.t[i]; q("p"+i).textContent=cur()[i]; q("o"+i).textContent=`ไทม์เอาต์: ${S.to[i]} จาก ${S.tmo}`; });
   q("v").textContent = (S.srv==null ? "ยังไม่มีทีมเสิร์ฟ" : S.t[S.srv]+" เสิร์ฟ") + (S.hs?" (ซ่อน)":"");
@@ -101,6 +103,13 @@ function render(){ [0,1].forEach(i=>{ q("h"+i).textContent=S.t[i]; q("p"+i).text
 function fit(){ const w=q("pv"), k=Math.min(1,w.clientWidth/1100); q("pf").style.transform=`scale(${k})`; w.style.height=(210*k)+"px"; }
 addEventListener("resize",fit);
 
+async function loadFonts(){ let L;
+  try{ const r = await fetch(`https://api.github.com/repos/${REPO}/contents/fonts`); L = (await r.json()).map(f=>f.name); localStorage.fl = JSON.stringify(L); }
+  catch(e){ L = JSON.parse(localStorage.fl || "[]"); }
+  L = L.filter(n=>/\.(ttf|otf)$/i.test(n)).sort();
+  q("fn").innerHTML = q("fb").innerHTML = '<option value="">ค่าเริ่มต้น</option>' + L.map(n=>`<option value="${n}">${n.replace(/\.(ttf|otf)$/i,"")}</option>`).join("");
+  fill(); }
+
 function conn(){ ws = new WebSocket(WS);
   ws.onopen = () => { q("s").textContent="ออนไลน์"; q("s").className="ok"; ws.send(JSON.stringify({key,check:1})); };
   ws.onclose = () => { q("s").textContent="เชื่อมต่อ "+WS+" ไม่ได้ (กำลังลองใหม่)"; q("s").className=""; setTimeout(conn,1000); };
@@ -108,7 +117,7 @@ function conn(){ ws = new WebSocket(WS);
     if(d.ok){ if(!got) send(); }
     else if(d.err){ localStorage.removeItem("k"); alert(d.err==2 ? "ลองผิดหลายครั้งเกินไป รอ 1 นาที" : "PIN ไม่ถูกต้อง"); location.reload(); }
     else if(!got){ got=1; S={...S,...d}; fill(); render(); } }; }
-fill(); render(); fit();
+fill(); render(); fit(); loadFonts();
 if(key){ q("pin").remove(); conn(); }
 else q("pi").oninput = e => { if(e.target.value.length==4){ key=e.target.value; localStorage.k=key; q("pin").remove(); conn(); } };
 </script></body></html>
