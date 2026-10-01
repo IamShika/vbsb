@@ -13,11 +13,12 @@ body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","No
 #r{display:flex;height:76px;margin-top:-1px}
 #r>*+*,#h div+div{margin-left:-1px}
 .t{flex:1;display:flex;align-items:center;gap:10px;padding:0 14px;min-width:0}
-#T0{flex-direction:row-reverse;background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 55%),color-mix(in srgb,var(--a) 90%,transparent)}
-#T1{background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 55%),color-mix(in srgb,var(--b) 90%,transparent)}
+#T0{background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 55%),color-mix(in srgb,var(--a) 90%,transparent)}
+#T1{flex-direction:row-reverse;background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 55%),color-mix(in srgb,var(--b) 90%,transparent)}
 #g0,#g1{height:52px;width:52px;object-fit:contain}
-.nm{display:flex;flex-direction:column;min-width:0}
-#T0 .nm{align-items:flex-end}
+.nm{display:flex;flex-direction:column;min-width:0;flex:1}
+#T0 .nm{align-items:flex-start}
+#T1 .nm{align-items:flex-end;text-align:right}
 .nm b{font-size:34px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nm small{font-size:13px;opacity:.9}
 .d{letter-spacing:3px;font-size:12px;height:14px}
@@ -33,22 +34,33 @@ body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","No
 #h{display:flex;justify-content:center;margin-top:-1px;flex-wrap:wrap}
 #h div{min-width:92px;text-align:center;padding:6px 10px;font-weight:700;font-size:20px;opacity:.8}
 #h div.cur{opacity:1;border-color:#ffe34d}
+#tm{border-radius:10px 10px 0 0}
+#g0,#g1{opacity:0;transform:translateY(14px);transition:opacity .45s var(--ez),transform .55s var(--ez)}
+#g0.on,#g1.on{opacity:1;transform:none}
+.d{display:flex;gap:4px;height:14px;align-items:center}
+#T1 .d{justify-content:flex-end}
+.d i{width:9px;height:9px;border-radius:50%;background:#fff;transition:opacity .5s var(--ez),transform .5s var(--ez)}
+.d i.u{opacity:0;transform:scale(.4)}
+#h div{position:relative;overflow:hidden;width:92px;height:34px;padding:0;border-radius:5px}
+#h span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.nm b{font-family:var(--fn,"Noto Sans Thai","Noto Sans",system-ui,sans-serif)}
+#ti span{font-family:var(--fb,"Noto Sans Thai","Noto Sans",system-ui,sans-serif)}
 </style></head><body>
 <div id="w">
  <div id="tm">0:00</div>
  <div id="r">
-  <div class="t" id="T0"><img id="g0"><div class="nm"><b id="n0"></b><small id="c0"></small><span class="d" id="d0"></span></div><img class="ball" id="v0" src="../img/vb.png" alt=""></div>
+  <div class="t" id="T0"><img id="g0" style="display:none"><img class="ball" id="v0" src="../img/vb.png" alt=""><div class="nm"><b id="n0"></b><small id="c0"></small><span class="d" id="d0"></span></div></div>
   <div class="w" id="w0"><span>0</span></div><div class="p" id="p0"><span>0</span></div><div class="dash">-</div><div class="p" id="p1"><span>0</span></div><div class="w" id="w1"><span>0</span></div>
-  <div class="t" id="T1"><img class="ball" id="v1" src="../img/vb.png" alt=""><img id="g1"><div class="nm" style="align-items:flex-start"><b id="n1"></b><small id="c1"></small><span class="d" id="d1"></span></div></div>
+  <div class="t" id="T1"><img id="g1" style="display:none"><img class="ball" id="v1" src="../img/vb.png" alt=""><div class="nm"><b id="n1"></b><small id="c1"></small><span class="d" id="d1"></span></div></div>
  </div>
  <div id="ti" style="display:none"><span></span></div>
- <div id="h"></div>
+ <div id="h"><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div></div>
 </div>
 <script>
 const WS = "wss://volley-board.doramongameing.workers.dev";
 const q = id => document.getElementById(id);
 const EZ = "cubic-bezier(0.109,0.575,0.333,0.974)", RM = matchMedia("(prefers-reduced-motion:reduce)").matches;
-let T = { ok: 0 }, first = true, D = null, off = 0, curB = null;
+let T = { ok: 0 }, first = true, D = null, off = 0, curB = null, hs = [], LG = ["", ""], FL = {};
 
 // tally-counter roll: score up = new number rises in; score down = the opposite
 function roll(el, v, skip, u){
@@ -62,7 +74,7 @@ function roll(el, v, skip, u){
 // banner: one title, or several lines that rotate on server time so every screen shows the same line
 function banner(d){
   const L = (d.ls || []).map(x => x.trim()).filter(Boolean);
-  if(!d.ml) return d.title || "";
+  if(!d.ml) return "";
   if(!L.length) return "";
   return L[(d.as ? Math.floor((Date.now() + off) / (1000 * (d.ms || 5))) : (d.li || 0)) % L.length];
 }
@@ -71,22 +83,41 @@ function tickB(skip){
   const el = q("ti"), hid = el.style.display === "none";
   el.style.display = b ? "" : "none"; if(b) roll(el, b, skip || hid, true);
 }
+function logo(i, u){
+  if(LG[i] === u) return; LG[i] = u; const el = q("g"+i); el.classList.remove("on");
+  if(!u){ setTimeout(() => { if(!LG[i]) el.style.display = "none"; }, 550); return; }
+  const im = new Image();
+  im.onload = () => { if(LG[i] !== u) return; el.src = u; el.style.display = ""; void el.offsetWidth; el.classList.add("on"); };
+  im.src = u; // logo fades in only after it has loaded successfully
+}
+function font(v, file){
+  const st = document.documentElement.style;
+  if(!file){ FL[v] = ""; st.removeProperty(v); return; }
+  if(FL[v] === file) return; FL[v] = file;
+  const fam = "f_" + file.replace(/[^a-z0-9]/gi, "_"), ff = new FontFace(fam, `url("../fonts/${encodeURI(file)}")`);
+  ff.load().then(f => { document.fonts.add(f); if(FL[v] === file) st.setProperty(v, `"${fam}","Noto Sans Thai",system-ui,sans-serif`); }).catch(() => {});
+}
 function set(id, v){ const el = q(id); if(el.textContent !== String(v)) el.textContent = v; }
 
 function render(d, skip){
   const r = document.documentElement.style; r.setProperty("--a", d.c[0]); r.setProperty("--b", d.c[1]);
+  font("--fn", d.fn || ""); font("--fb", d.fb || "");
   let w = [0,0]; d.sc.forEach((s,i) => { if(i < d.set){ if(s[0] > s[1]) w[0]++; else if(s[1] > s[0]) w[1]++; } });
   [0,1].forEach(i => {
     set("n"+i, d.t[i]); set("c"+i, d.rec[i] || ""); q("c"+i).style.display = (d.rec[i] || "").trim() ? "" : "none"; roll(q("p"+i), d.sc[d.set][i], skip); roll(q("w"+i), w[i], skip);
-    q("d"+i).textContent = "●".repeat(Math.max(0, d.tmo - d.to[i])) + "○".repeat(Math.min(d.tmo, d.to[i]));
-    q("g"+i).style.display = d.logo[i] ? "" : "none"; if(d.logo[i] && q("g"+i).src !== d.logo[i]) q("g"+i).src = d.logo[i];
+    const dd = q("d"+i); while(dd.children.length < d.tmo) dd.appendChild(document.createElement("i")); while(dd.children.length > d.tmo) dd.lastChild.remove();
+    [...dd.children].forEach((c, k) => c.classList.toggle("u", k < d.to[i])); // used timeouts fade out
+    logo(i, d.logo[i] || "");
     q("v"+i).classList.toggle("on", d.srv === i && !d.hs);
   });
   if(d.now) off = d.now - Date.now(); D = d; tickB(skip);
   q("tm").style.display = d.timer ? "" : "none";
   T = { ok: !!d.at, ev: d.ev, la: Date.now() - (d.now - d.at), dur: d.dur || 0, fz: d.fz || 0 };
-  q("h").innerHTML = d.sc.map((s,i) => i <= d.set && (s[0] || s[1] || i < d.set)
-    ? `<div class="${i === d.set ? "cur" : ""}">${s[0]} - ${s[1]}</div>` : "").join("");
+  [...q("h").children].forEach((c, i) => { const s = d.sc[i], show = i <= d.set && (s[0] || s[1] || i < d.set), sum = s[0] + s[1];
+    c.classList.toggle("cur", i === d.set);
+    if(show){ const was = c.style.display === "none"; c.style.display = ""; roll(c, s[0] + " - " + s[1], skip || was, sum >= (hs[i] || 0)); hs[i] = sum;
+      if(was && !skip && !RM) c.animate([{ opacity: 0, transform: "translateY(14px)" }, { opacity: i === d.set ? 1 : .8, transform: "none" }], { duration: 450, easing: EZ }); }
+    else { c.style.display = "none"; hs[i] = 0; } });
   q("w").style.opacity = 1;
 }
 
