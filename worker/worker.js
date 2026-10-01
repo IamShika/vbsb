@@ -5,7 +5,7 @@ export class Board {
   constructor(ctx, env) { this.c = ctx; this.e = env; }
 
   async fetch(req) {
-    if (req.headers.get('Upgrade') !== 'websocket') return new Response('Durable Object OK');
+    if (req.headers.get('Upgrade') !== 'websocket') return new Response('Durable Object OK v3');
     const [client, server] = Object.values(new WebSocketPair());
     this.c.acceptWebSocket(server);
     const s = await this.c.storage.get('s');
@@ -33,7 +33,10 @@ export class Board {
     else {
       const now = Date.now();
       let fz = 0; // how long the rally lasted (shown while paused)
-      if (s.ev === 'p' && old.at) fz = Math.max(0, now - (old.ev === 'p' ? old.at + (old.dur || 0) : old.at));
+      if (s.ev === 'p' && old.at) {
+        const start = old.ev === 'p' ? old.at + (old.dur || 0) : old.at;
+        fz = now < start ? (old.fz || 0) : now - start; // scored during a pause: keep the frozen time
+      }
       s.at = now; s.fz = fz;
     }
     await this.c.storage.put('s', s);
