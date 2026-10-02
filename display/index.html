@@ -76,6 +76,9 @@ body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","No
 .big span,.sw span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .sr{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700}
 .sw{position:relative;overflow:hidden;width:44px;height:44px;font-size:30px}
+.sr{font-size:calc(22px*var(--ze,1));font-family:var(--fe,var(--ff))}
+.sw{font-size:calc(30px*var(--ze,1))}
+.w{font-size:calc(26px*var(--ze,1));font-family:var(--fe,var(--ff))}
 </style></head><body>
 <div id="w">
  <div id="tm">0:00</div>
@@ -96,7 +99,7 @@ body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","No
 const WS = "wss://volley-board.doramongameing.workers.dev";
 const q = id => document.getElementById(id);
 const EZ = "cubic-bezier(0.109,0.575,0.333,0.974)", RM = matchMedia("(prefers-reduced-motion:reduce)").matches;
-let T = { ok: 0 }, first = true, D = null, off = 0, curB = null, hs = [], LG = ["", ""], FL = {}, M = null, mt = 0, CB = {};
+let T = { ok: 0 }, first = true, D = null, off = 0, curB = null, hs = [], LG = ["", ""], FL = {}, M = null, MV = null, TA = null, mt = 0, CB = {};
 
 // tally-counter roll: score up = new number rises in; score down = the opposite
 function roll(el, v, skip, u){
@@ -118,10 +121,15 @@ function tickB(skip){
 }
 // screen change: old view fades up and out, new one rises in (same curve as everything else)
 function setMode(m, skip){
-  if(m === M) return; const old = M && q("v"+M), nx = q("v"+m), tk = ++mt; M = m;
-  const go = () => { if(tk !== mt) return; nx.style.display = "";
-    nx.animate([{ opacity: 0, transform: "translateY(18px)" }, { opacity: 1, transform: "none" }], { duration: skip || RM ? 0 : 500, easing: EZ }); };
-  if(old && !skip && !RM) old.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-18px)" }], { duration: 300, easing: EZ }).onfinish = () => { old.style.display = "none"; go(); };
+  if(m === M) return; const old = M && q("v"+M), nx = q("v"+m), tm = q("tm"), tk = ++mt; M = m;
+  const OUT = [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-18px)" }],
+        IN = [{ opacity: 0, transform: "translateY(18px)" }, { opacity: 1, transform: "none" }];
+  const go = () => { if(TA){ TA.cancel(); TA = null; } if(tk !== mt) return; MV = m; nx.style.display = "";
+    tm.style.display = (D.timer || m === "t") ? "" : "none";
+    const o = { duration: skip || RM ? 0 : 500, easing: EZ }; nx.animate(IN, o); tm.animate(IN, o); };
+  if(old && !skip && !RM){ // the timer moves with the screen: out with the old view, in with the new one
+    TA = tm.animate(OUT, { duration: 300, easing: EZ, fill: "forwards" });
+    old.animate(OUT, { duration: 300, easing: EZ }).onfinish = () => { old.style.display = "none"; go(); }; }
   else { if(old) old.style.display = "none"; go(); }
 }
 function logo(i, u){
@@ -143,7 +151,7 @@ function set(id, v){ const el = q(id); if(el.textContent !== String(v)) el.textC
 
 function render(d, skip){
   const r = document.documentElement.style; r.setProperty("--a", d.c[0]); r.setProperty("--b", d.c[1]);
-  for(const k of "nbspt"){ font("--f"+k, d["f"+k] || ""); document.documentElement.style.setProperty("--z"+k, (d["z"+k] || 100) / 100); }
+  for(const k of "nbspte"){ font("--f"+k, d["f"+k] || ""); document.documentElement.style.setProperty("--z"+k, (d["z"+k] || 100) / 100); }
   let w = [0,0]; d.sc.forEach((s,i) => { if(i < d.set){ if(s[0] > s[1]) w[0]++; else if(s[1] > s[0]) w[1]++; } });
   [0,1].forEach(i => {
     set("n"+i, d.t[i]); set("c"+i, d.rec[i] || ""); q("c"+i).style.display = (d.rec[i] || "").trim() ? "" : "none"; roll(q("p"+i), d.sc[d.set][i], skip); roll(q("w"+i), w[i], skip);
@@ -156,7 +164,7 @@ function render(d, skip){
   q("tt").style.setProperty("--tc", d.tt == null ? "#888" : d.c[d.tt]); q("tt").textContent = d.tt == null ? "ไทม์เอาต์" : "ไทม์เอาต์ · " + d.t[d.tt];
   [0,1].forEach(i => { q("ub"+i).classList.toggle("on", d.srv === i && !d.hs); set("un"+i, d.t[i]); roll(q("up"+i), d.sc[d.set][i], skip); roll(q("uw"+i), w[i], skip); });
   setMode(d.mode || "g", skip);
-  q("tm").style.display = (d.timer || d.mode === "t") ? "" : "none";
+  q("tm").style.display = (d.timer || MV === "t") ? "" : "none";
   let fz = d.fz; // time to show while paused: the server's value if it sent one, else what this screen was showing
   if(fz === undefined) fz = T.tid === d.tid ? T.fz : (d.ev === "p" && !skip ? (T.pz ? T.fz : curMs()) : 0);
   T = { ok: !!d.at, ev: d.ev, tid: d.tid, la: Date.now() - (d.now - d.at), dur: d.dur || 0, fz: fz || 0, pz: false };
@@ -173,7 +181,7 @@ setInterval(() => { let m = 0, pz = false;
   if(T.ok){ const e = Date.now() - T.la;
     if(T.ev === "p"){ if(e < T.dur){ m = T.fz; pz = true; } else m = e - T.dur; } else m = e; }
   const s = Math.floor(Math.max(0, m) / 1000);
-  q("tm").textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); T.pz = pz; q("tm").classList.toggle("pz", pz || M === "t"); tickB(false); }, 100);
+  q("tm").textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); T.pz = pz; q("tm").classList.toggle("pz", pz || MV === "t"); tickB(false); }, 100);
 
 render({t:["เหย้า","เยือน"],c:["#ff0033","#19c6ff"],rec:["",""],ml:false,ls:[],wl:[],mode:"g",tt:null,logo:["",""],sc:[[0,0],[0,0],[0,0],[0,0],[0,0]],set:0,to:[0,0],srv:null,hs:false,title:"",timer:true,tmo:2,dur:0,ev:"r",now:0,at:0}, true);
 function conn(){ const ws = new WebSocket(WS);
