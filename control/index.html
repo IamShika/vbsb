@@ -59,7 +59,7 @@ summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
   <label><input type="checkbox" id="tg" onchange="S.timer=this.checked;send()"> แสดงตัวจับเวลา</label>
   หยุดเวลาหลังได้แต้ม (วินาที) <input id="ts" type="number" min="1" oninput="S.pz=+this.value||5;send()">
   ไทม์เอาต์ต่อเซต <input id="tm" type="number" min="1" max="5" oninput="S.tmo=+this.value||2;send()"></div>
- <div class="fc" data-k="npbt"></div>
+ <div class="fc" data-k="npbte"></div>
 </section>
 
 <section class="m" id="m-t" style="display:none">
@@ -67,7 +67,7 @@ summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
   <div class="g" id="tpk"><button id="tp0" onclick="startTo(0)"></button><button id="tp1" onclick="startTo(1)"></button></div>
   <button id="etb" class="r" onclick="go('g')">จบไทม์เอาต์ กลับสู่เกม</button>
   <button class="x" onclick="S.ev='r';S.dur=0;S.tid++;send()">เริ่มจับเวลาใหม่</button></div>
- <div class="fc" data-k="npt"></div>
+ <div class="fc" data-k="npte"></div>
 </section>
 
 <div class="c" id="bn"><h3>แบนเนอร์หลายบรรทัด</h3>
@@ -83,18 +83,18 @@ summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
 const WS = "wss://volley-board.doramongameing.workers.dev";
 const REPO = "iamshika/vbsb"; // GitHub user/repo that hosts the /fonts folder
 const q = id => document.getElementById(id), EZ = "cubic-bezier(0.109,0.575,0.333,0.974)";
-const FN = { n:"ชื่อทีม", b:"แบนเนอร์", s:"หัวข้อย่อย", p:"คะแนน", t:"ตัวจับเวลา" };
+const FN = { n:"ชื่อทีม", b:"แบนเนอร์", s:"หัวข้อย่อย", p:"คะแนน", t:"ตัวจับเวลา", e:"เซต" };
 let key = localStorage.k || "", ws, got = 0;
 let S = { t:["เหย้า","เยือน"], c:["#ff0033","#19c6ff"], rec:["",""], logo:["",""],
   sc:[[0,0],[0,0],[0,0],[0,0],[0,0]], set:0, to:[0,0], srv:null, hs:false, timer:true, pz:5, tmo:2, dur:0, tid:0, ev:"r",
   ml:false, ls:[], ms:5, as:true, li:0, mode:"g", tt:null, wl:["warming-up"],
-  fn:"", fb:"", fs:"", fp:"", ft:"", zn:100, zb:100, zs:100, zp:100, zt:100 };
+  fn:"", fb:"", fs:"", fp:"", ft:"", zn:100, zb:100, zs:100, zp:100, zt:100, fe:"", ze:100 };
 
 q("teams").innerHTML = [0,1].map(i => `<div class="c"><h3 id="h${i}"></h3>
  <div class="n" id="p${i}"></div><div class="l">คะแนน</div>
  <div class="g"><button onclick="pt(${i},1)">+1</button><button class="x" onclick="pt(${i},-1)">-1</button></div>
  <div class="l" id="o${i}" style="margin-top:10px"></div>
- <div class="g"><button onclick="to(${i},1)">+1 (เข้าไทม์เอาต์)</button><button class="x" onclick="to(${i},-1)">-1</button></div></div>`).join("");
+ <div class="g"><button onclick="to(${i},1)">+1</button><button class="x" onclick="to(${i},-1)">-1</button></div></div>`).join("");
 q("setup").innerHTML = [0,1].map(i => `<div>ชื่อทีม ${i+1}<input id="t${i}" oninput="S.t[${i}]=this.value;send()">
  สถิติ/อันดับ (เว้นว่างได้)<input id="r${i}" oninput="S.rec[${i}]=this.value;send()">
  สี<input id="c${i}" type="color" oninput="S.c[${i}]=this.value;send()">
