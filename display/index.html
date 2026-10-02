@@ -35,8 +35,8 @@ body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","No
 #h div{min-width:92px;text-align:center;padding:6px 10px;font-weight:700;font-size:20px;opacity:.8}
 #h div.cur{opacity:1;border-color:#ffe34d}
 #tm{border-radius:10px 10px 0 0}
-#g0,#g1{opacity:0;transform:translateY(14px);transition:opacity .45s var(--ez),transform .55s var(--ez)}
-#g0.on,#g1.on{opacity:1;transform:none}
+#g0,#g1,#ug0,#ug1{opacity:0;transform:translateY(14px);transition:opacity .45s var(--ez),transform .55s var(--ez)}
+#g0.on,#g1.on,#ug0.on,#ug1.on{opacity:1;transform:none}
 .d{display:flex;gap:4px;height:14px;align-items:center}
 #T0 .d{justify-content:flex-end}
 .d i{width:9px;height:9px;border-radius:50%;background:#fff;transition:opacity .5s var(--ez),transform .5s var(--ez)}
@@ -53,20 +53,29 @@ body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","No
 #ti{height:calc(42px*max(1,var(--zb,1)));font-size:calc(22px*var(--zb,1))}
 #ti span,#wb span{font-family:var(--fb,var(--ff))}
 #ws span{font-family:var(--fs,var(--ff))}
-#wb,#ws{position:relative;overflow:hidden;margin-top:-1px;font-weight:700}
-#wb{height:calc(130px*max(1,var(--zb,1)));font-size:calc(52px*var(--zb,1))}
-#ws{height:calc(70px*max(1,var(--zs,1)));font-size:calc(30px*var(--zs,1))}
+#stg{display:grid;min-height:150px}
+.v{grid-area:1/1;min-width:0}
+#vg{align-self:start}
+#vw,#vt{display:flex;flex-direction:column}
+#wb,#ws{position:relative;overflow:hidden;margin-top:-1px;font-weight:700;min-height:0}
+#wb{flex:1.3;font-size:calc(28px*var(--zb,1))}
+#ws{flex:1;font-size:calc(20px*var(--zs,1))}
 #wb span,#ws span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:0 16px;text-align:center}
-#tt{height:64px;margin-top:-1px;display:flex;align-items:center;justify-content:center;font-size:calc(34px*var(--zn,1));font-weight:700;font-family:var(--fn,var(--ff));background:var(--sh),color-mix(in srgb,var(--tc,#888) 90%,transparent)}
-#tr{display:flex;margin-top:-1px}
-.tc{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 6px;min-width:0}
+#tt{flex:none;height:34px;margin-top:-1px;display:flex;align-items:center;justify-content:center;font-size:calc(20px*var(--zn,1));font-weight:700;font-family:var(--fn,var(--ff));background:var(--sh),color-mix(in srgb,var(--tc,#888) 90%,transparent)}
+#tr{flex:1;display:flex;margin-top:-1px;min-height:0}
+.tc{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 14px;min-width:0}
 #U0{background:var(--sh),color-mix(in srgb,var(--a) 90%,transparent)}
 #U1{margin-left:-1px;background:var(--sh),color-mix(in srgb,var(--b) 90%,transparent)}
-.tc b{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:calc(40px*var(--zn,1));font-family:var(--fn,var(--ff))}
-.big{position:relative;overflow:hidden;width:100%;height:calc(170px*max(1,var(--zp,1)));font-size:calc(150px*var(--zp,1));font-weight:700;font-family:var(--fp,var(--ff))}
+.th{display:flex;align-items:center;gap:10px;height:38px}
+#U0 .th{justify-content:flex-start}#U1 .th{justify-content:flex-end}
+.th b{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:calc(28px*var(--zn,1));font-family:var(--fn,var(--ff))}
+#ug0,#ug1{height:32px;width:32px;object-fit:contain;flex:none}
+.th .ball{width:30px;height:30px}
+.tsr{display:flex;align-items:center;justify-content:center;gap:18px}
+.big{position:relative;overflow:hidden;width:150px;height:calc(70px*max(1,var(--zp,1)));font-size:calc(66px*var(--zp,1));font-weight:700;font-family:var(--fp,var(--ff))}
 .big span,.sw span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-.sr{display:flex;align-items:center;gap:10px;font-size:26px;font-weight:700}
-.sw{position:relative;overflow:hidden;width:52px;height:52px;font-size:36px}
+.sr{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700}
+.sw{position:relative;overflow:hidden;width:44px;height:44px;font-size:30px}
 </style></head><body>
 <div id="w">
  <div id="tm">0:00</div>
@@ -80,7 +89,7 @@ body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","No
  <div id="h"><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div></div>
 </div>
 <div class="v" id="vw" style="display:none"><div id="wb" class="gl" style="display:none"><span></span></div><div id="ws" class="gl" style="display:none"><span></span></div></div>
-<div class="v" id="vt" style="display:none"><div id="tt" class="gl">ไทม์เอาต์</div><div id="tr"><div class="tc" id="U0"><b id="un0"></b><div class="big" id="up0"><span>0</span></div><div class="sr">เซต<div class="sw" id="uw0"><span>0</span></div></div></div><div class="tc" id="U1"><b id="un1"></b><div class="big" id="up1"><span>0</span></div><div class="sr">เซต<div class="sw" id="uw1"><span>0</span></div></div></div></div></div>
+<div class="v" id="vt" style="display:none"><div id="tt" class="gl">ไทม์เอาต์</div><div id="tr"><div class="tc" id="U0"><div class="th"><img id="ug0" style="display:none"><b id="un0"></b><img class="ball" id="ub0" src="../img/vb.png" alt=""></div><div class="tsr"><div class="big" id="up0"><span>0</span></div><div class="sr">เซต<div class="sw" id="uw0"><span>0</span></div></div></div></div><div class="tc" id="U1"><div class="th"><img class="ball" id="ub1" src="../img/vb.png" alt=""><b id="un1"></b><img id="ug1" style="display:none"></div><div class="tsr"><div class="big" id="up1"><span>0</span></div><div class="sr">เซต<div class="sw" id="uw1"><span>0</span></div></div></div></div></div></div>
 </div>
 </div>
 <script>
@@ -116,10 +125,10 @@ function setMode(m, skip){
   else { if(old) old.style.display = "none"; go(); }
 }
 function logo(i, u){
-  if(LG[i] === u) return; LG[i] = u; const el = q("g"+i); el.classList.remove("on");
-  if(!u){ setTimeout(() => { if(!LG[i]) el.style.display = "none"; }, 550); return; }
+  if(LG[i] === u) return; LG[i] = u; const els = [q("g"+i), q("ug"+i)]; els.forEach(e => e.classList.remove("on"));
+  if(!u){ setTimeout(() => { if(!LG[i]) els.forEach(e => e.style.display = "none"); }, 550); return; }
   const im = new Image();
-  im.onload = () => { if(LG[i] !== u) return; el.src = u; el.style.display = ""; void el.offsetWidth; el.classList.add("on"); };
+  im.onload = () => { if(LG[i] !== u) return; els.forEach(e => { e.src = u; e.style.display = ""; }); void els[0].offsetWidth; els.forEach(e => e.classList.add("on")); };
   im.src = u; // logo fades in only after it has loaded successfully
 }
 function font(v, file){
@@ -145,7 +154,7 @@ function render(d, skip){
   });
   if(d.now) off = d.now - Date.now(); D = d; tickB(skip);
   q("tt").style.setProperty("--tc", d.tt == null ? "#888" : d.c[d.tt]); q("tt").textContent = d.tt == null ? "ไทม์เอาต์" : "ไทม์เอาต์ · " + d.t[d.tt];
-  [0,1].forEach(i => { set("un"+i, d.t[i]); roll(q("up"+i), d.sc[d.set][i], skip); roll(q("uw"+i), w[i], skip); });
+  [0,1].forEach(i => { q("ub"+i).classList.toggle("on", d.srv === i && !d.hs); set("un"+i, d.t[i]); roll(q("up"+i), d.sc[d.set][i], skip); roll(q("uw"+i), w[i], skip); });
   setMode(d.mode || "g", skip);
   q("tm").style.display = (d.timer || d.mode === "t") ? "" : "none";
   let fz = d.fz; // time to show while paused: the server's value if it sent one, else what this screen was showing
@@ -164,7 +173,7 @@ setInterval(() => { let m = 0, pz = false;
   if(T.ok){ const e = Date.now() - T.la;
     if(T.ev === "p"){ if(e < T.dur){ m = T.fz; pz = true; } else m = e - T.dur; } else m = e; }
   const s = Math.floor(Math.max(0, m) / 1000);
-  q("tm").textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); T.pz = pz; q("tm").classList.toggle("pz", pz); tickB(false); }, 100);
+  q("tm").textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); T.pz = pz; q("tm").classList.toggle("pz", pz || M === "t"); tickB(false); }, 100);
 
 render({t:["เหย้า","เยือน"],c:["#ff0033","#19c6ff"],rec:["",""],ml:false,ls:[],wl:[],mode:"g",tt:null,logo:["",""],sc:[[0,0],[0,0],[0,0],[0,0],[0,0]],set:0,to:[0,0],srv:null,hs:false,title:"",timer:true,tmo:2,dur:0,ev:"r",now:0,at:0}, true);
 function conn(){ const ws = new WebSocket(WS);
