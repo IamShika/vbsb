@@ -7,7 +7,7 @@
 body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","Noto Sans",system-ui,sans-serif;text-shadow:0 1px 6px rgba(0,0,0,.35)}
 #w{width:min(100vw,1100px);margin:0 auto;opacity:0;transition:opacity .6s var(--ez)}
 /* infused glass: blurred backdrop + soft sheen + thin bright edge, square corners */
-#tm,.t,.w,.p,.dash,#ti,#h div{-webkit-backdrop-filter:blur(14px) saturate(1.6) brightness(1.2);backdrop-filter:blur(14px) saturate(1.6) brightness(1.2);border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 60%),rgba(12,22,44,.45)}
+#tm,.t,.w,.p,.dash,#ti,#h div,.gl,.tc{-webkit-backdrop-filter:blur(14px) saturate(1.6) brightness(1.2);backdrop-filter:blur(14px) saturate(1.6) brightness(1.2);border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 60%),rgba(12,22,44,.45)}
 #tm{width:130px;margin:0 auto;text-align:center;font-weight:700;font-size:28px;line-height:1.3;transition:color .3s var(--ez)}
 #tm.pz{color:#2b1d00;text-shadow:none;border-color:#ffe08a;background:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,0) 60%),rgba(255,190,20,.92)}
 #r{display:flex;height:76px;margin-top:-1px}
@@ -45,9 +45,32 @@ body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","No
 #h span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .nm b{font-family:var(--fn,"Noto Sans Thai","Noto Sans",system-ui,sans-serif)}
 #ti span{font-family:var(--fb,"Noto Sans Thai","Noto Sans",system-ui,sans-serif)}
+:root{--ff:"Noto Sans Thai","Noto Sans",system-ui,sans-serif;--sh:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 55%)}
+#tm{font-size:calc(28px*var(--zt,1));font-family:var(--ft,var(--ff))}
+.nm b{font-size:calc(34px*var(--zn,1));font-family:var(--fn,var(--ff))}
+.p{font-size:calc(56px*var(--zp,1));font-family:var(--fp,var(--ff))}
+#r{height:calc(76px*max(1,var(--zn,1),var(--zp,1)))}
+#ti{height:calc(42px*max(1,var(--zb,1)));font-size:calc(22px*var(--zb,1))}
+#ti span,#wb span{font-family:var(--fb,var(--ff))}
+#ws span{font-family:var(--fs,var(--ff))}
+#wb,#ws{position:relative;overflow:hidden;margin-top:-1px;font-weight:700}
+#wb{height:calc(130px*max(1,var(--zb,1)));font-size:calc(52px*var(--zb,1))}
+#ws{height:calc(70px*max(1,var(--zs,1)));font-size:calc(30px*var(--zs,1))}
+#wb span,#ws span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:0 16px;text-align:center}
+#tt{height:64px;margin-top:-1px;display:flex;align-items:center;justify-content:center;font-size:calc(34px*var(--zn,1));font-weight:700;font-family:var(--fn,var(--ff));background:var(--sh),color-mix(in srgb,var(--tc,#888) 90%,transparent)}
+#tr{display:flex;margin-top:-1px}
+.tc{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 6px;min-width:0}
+#U0{background:var(--sh),color-mix(in srgb,var(--a) 90%,transparent)}
+#U1{margin-left:-1px;background:var(--sh),color-mix(in srgb,var(--b) 90%,transparent)}
+.tc b{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:calc(40px*var(--zn,1));font-family:var(--fn,var(--ff))}
+.big{position:relative;overflow:hidden;width:100%;height:calc(170px*max(1,var(--zp,1)));font-size:calc(150px*var(--zp,1));font-weight:700;font-family:var(--fp,var(--ff))}
+.big span,.sw span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.sr{display:flex;align-items:center;gap:10px;font-size:26px;font-weight:700}
+.sw{position:relative;overflow:hidden;width:52px;height:52px;font-size:36px}
 </style></head><body>
 <div id="w">
  <div id="tm">0:00</div>
+ <div id="stg"><div class="v" id="vg">
  <div id="r">
   <div class="t" id="T0"><img id="g0" style="display:none"><img class="ball" id="v0" src="../img/vb.png" alt=""><div class="nm"><b id="n0"></b><small id="c0"></small><span class="d" id="d0"></span></div></div>
   <div class="w" id="w0"><span>0</span></div><div class="p" id="p0"><span>0</span></div><div class="dash">-</div><div class="p" id="p1"><span>0</span></div><div class="w" id="w1"><span>0</span></div>
@@ -56,11 +79,15 @@ body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","No
  <div id="ti" style="display:none"><span></span></div>
  <div id="h"><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div></div>
 </div>
+<div class="v" id="vw" style="display:none"><div id="wb" class="gl" style="display:none"><span></span></div><div id="ws" class="gl" style="display:none"><span></span></div></div>
+<div class="v" id="vt" style="display:none"><div id="tt" class="gl">ไทม์เอาต์</div><div id="tr"><div class="tc" id="U0"><b id="un0"></b><div class="big" id="up0"><span>0</span></div><div class="sr">เซต<div class="sw" id="uw0"><span>0</span></div></div></div><div class="tc" id="U1"><b id="un1"></b><div class="big" id="up1"><span>0</span></div><div class="sr">เซต<div class="sw" id="uw1"><span>0</span></div></div></div></div></div>
+</div>
+</div>
 <script>
 const WS = "wss://volley-board.doramongameing.workers.dev";
 const q = id => document.getElementById(id);
 const EZ = "cubic-bezier(0.109,0.575,0.333,0.974)", RM = matchMedia("(prefers-reduced-motion:reduce)").matches;
-let T = { ok: 0 }, first = true, D = null, off = 0, curB = null, hs = [], LG = ["", ""], FL = {};
+let T = { ok: 0 }, first = true, D = null, off = 0, curB = null, hs = [], LG = ["", ""], FL = {}, M = null, mt = 0, CB = {};
 
 // tally-counter roll: score up = new number rises in; score down = the opposite
 function roll(el, v, skip, u){
@@ -71,17 +98,22 @@ function roll(el, v, skip, u){
   n.animate([{ transform: `translateY(${up ? "100%" : "-100%"})`, opacity: 0 }, { transform: "none", opacity: 1 }], o);
   old.animate([{ transform: "none", opacity: 1 }, { transform: `translateY(${up ? "-100%" : "100%"})`, opacity: 0 }], o).onfinish = () => old.remove();
 }
-// banner: one title, or several lines that rotate on server time so every screen shows the same line
-function banner(d){
-  const L = (d.ls || []).map(x => x.trim()).filter(Boolean);
-  if(!d.ml) return "";
-  if(!L.length) return "";
-  return L[(d.as ? Math.floor((Date.now() + off) / (1000 * (d.ms || 5))) : (d.li || 0)) % L.length];
-}
+// banner / subheader lines rotate on server time so every screen shows the same line
+function pick(L, d){ L = (L || []).map(x => x.trim()).filter(Boolean); if(!L.length) return "";
+  return L[(d.as ? Math.floor((Date.now() + off) / (1000 * (d.ms || 5))) : (d.li || 0)) % L.length]; }
 function tickB(skip){
-  if(!D) return; const b = banner(D); if(b === curB) return; curB = b;
-  const el = q("ti"), hid = el.style.display === "none";
-  el.style.display = b ? "" : "none"; if(b) roll(el, b, skip || hid, true);
+  if(!D) return;
+  [["ti", D.ml ? pick(D.ls, D) : ""], ["wb", pick(D.ls, D)], ["ws", pick(D.wl, D)]].forEach(([id, b]) => {
+    if(b === CB[id]) return; CB[id] = b; const el = q(id), hid = el.style.display === "none";
+    el.style.display = b ? "" : "none"; if(b) roll(el, b, skip || hid, true); });
+}
+// screen change: old view fades up and out, new one rises in (same curve as everything else)
+function setMode(m, skip){
+  if(m === M) return; const old = M && q("v"+M), nx = q("v"+m), tk = ++mt; M = m;
+  const go = () => { if(tk !== mt) return; nx.style.display = "";
+    nx.animate([{ opacity: 0, transform: "translateY(18px)" }, { opacity: 1, transform: "none" }], { duration: skip || RM ? 0 : 500, easing: EZ }); };
+  if(old && !skip && !RM) old.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-18px)" }], { duration: 300, easing: EZ }).onfinish = () => { old.style.display = "none"; go(); };
+  else { if(old) old.style.display = "none"; go(); }
 }
 function logo(i, u){
   if(LG[i] === u) return; LG[i] = u; const el = q("g"+i); el.classList.remove("on");
@@ -102,7 +134,7 @@ function set(id, v){ const el = q(id); if(el.textContent !== String(v)) el.textC
 
 function render(d, skip){
   const r = document.documentElement.style; r.setProperty("--a", d.c[0]); r.setProperty("--b", d.c[1]);
-  font("--fn", d.fn || ""); font("--fb", d.fb || "");
+  for(const k of "nbspt"){ font("--f"+k, d["f"+k] || ""); document.documentElement.style.setProperty("--z"+k, (d["z"+k] || 100) / 100); }
   let w = [0,0]; d.sc.forEach((s,i) => { if(i < d.set){ if(s[0] > s[1]) w[0]++; else if(s[1] > s[0]) w[1]++; } });
   [0,1].forEach(i => {
     set("n"+i, d.t[i]); set("c"+i, d.rec[i] || ""); q("c"+i).style.display = (d.rec[i] || "").trim() ? "" : "none"; roll(q("p"+i), d.sc[d.set][i], skip); roll(q("w"+i), w[i], skip);
@@ -112,7 +144,10 @@ function render(d, skip){
     q("v"+i).classList.toggle("on", d.srv === i && !d.hs);
   });
   if(d.now) off = d.now - Date.now(); D = d; tickB(skip);
-  q("tm").style.display = d.timer ? "" : "none";
+  q("tt").style.setProperty("--tc", d.tt == null ? "#888" : d.c[d.tt]); q("tt").textContent = d.tt == null ? "ไทม์เอาต์" : "ไทม์เอาต์ · " + d.t[d.tt];
+  [0,1].forEach(i => { set("un"+i, d.t[i]); roll(q("up"+i), d.sc[d.set][i], skip); roll(q("uw"+i), w[i], skip); });
+  setMode(d.mode || "g", skip);
+  q("tm").style.display = (d.timer || d.mode === "t") ? "" : "none";
   let fz = d.fz; // time to show while paused: the server's value if it sent one, else what this screen was showing
   if(fz === undefined) fz = T.tid === d.tid ? T.fz : (d.ev === "p" && !skip ? (T.pz ? T.fz : curMs()) : 0);
   T = { ok: !!d.at, ev: d.ev, tid: d.tid, la: Date.now() - (d.now - d.at), dur: d.dur || 0, fz: fz || 0, pz: false };
@@ -131,7 +166,7 @@ setInterval(() => { let m = 0, pz = false;
   const s = Math.floor(Math.max(0, m) / 1000);
   q("tm").textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); T.pz = pz; q("tm").classList.toggle("pz", pz); tickB(false); }, 100);
 
-render({t:["เหย้า","เยือน"],c:["#ff0033","#19c6ff"],rec:["",""],ml:false,ls:[],logo:["",""],sc:[[0,0],[0,0],[0,0],[0,0],[0,0]],set:0,to:[0,0],srv:null,hs:false,title:"",timer:true,tmo:2,dur:0,ev:"r",now:0,at:0}, true);
+render({t:["เหย้า","เยือน"],c:["#ff0033","#19c6ff"],rec:["",""],ml:false,ls:[],wl:[],mode:"g",tt:null,logo:["",""],sc:[[0,0],[0,0],[0,0],[0,0],[0,0]],set:0,to:[0,0],srv:null,hs:false,title:"",timer:true,tmo:2,dur:0,ev:"r",now:0,at:0}, true);
 function conn(){ const ws = new WebSocket(WS);
   ws.onmessage = e => { const d = JSON.parse(e.data); if(!d.err){ render(d, first); first = false; } };
   ws.onclose = () => setTimeout(conn, 1000); }
