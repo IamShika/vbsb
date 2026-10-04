@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>แผงควบคุมวอลเลย์บอล</title>
+<style>
+body{margin:0;padding:8px;background:#10151f;color:#eef;font:15px "Noto Sans Thai",system-ui,sans-serif}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.c{background:#1a2235;border-radius:8px;padding:10px;margin-bottom:8px}
+h3{margin:0 0 8px;font-size:15px;color:#9bb}
+button{width:100%;padding:14px 6px;border:0;border-radius:6px;background:#2f6bff;color:#fff;font:inherit;font-size:16px;margin-top:6px}
+button:active{filter:brightness(1.4)}
+.x{background:#3b4562}.r{background:#d63a3a}
+input,textarea,select{width:100%;box-sizing:border-box;padding:9px;margin:3px 0;background:#10151f;color:#fff;border:1px solid #334;border-radius:6px;font:inherit}
+textarea{min-height:110px}
+input[type=color]{height:40px;padding:2px}input[type=checkbox]{width:auto}
+.n{font-size:44px;text-align:center;font-weight:700}
+.l{text-align:center;color:#9bb}
+summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
+#pv{position:relative;overflow:hidden;width:100%;background:#0a0e17}
+#pf{position:absolute;left:0;top:0;width:1100px;height:210px;border:0;transform-origin:0 0}
+#s{position:sticky;top:0;z-index:2;padding:6px;margin:-8px -8px 8px;text-align:center;background:#d63a3a}
+#s.ok{background:#1c9b5a}
+#modes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+#modes button{margin:0;background:#2a3350;transition:background .4s,color .4s}
+#modes button.on{background:#ffb800;color:#201500;font-weight:700}
+</style><style id="skin">
+@font-face{font-family:PromptK;src:url(../fonts/Prompt-Black.ttf);font-weight:900}
+@font-face{font-family:PromptK;src:url(../fonts/Prompt-ExtraBold.ttf);font-weight:800}
+@font-face{font-family:PromptK;src:url(../fonts/Prompt-Bold.ttf);font-weight:700}
+:root{--y:#fff04a;--gold:#f6c453;--cy:#7fe6ff;--pk:#ff6f9c}
+body{font:700 15px/1.35 PromptK,"Noto Sans Thai",system-ui,sans-serif;color:#eaf6ff;background:radial-gradient(circle at 12% -5%,rgba(127,230,255,.28),transparent 45%),radial-gradient(circle at 96% 8%,rgba(255,111,156,.2),transparent 40%) fixed,#07111f}
+#pin{background:radial-gradient(circle at 50% 0,#1d4c6e,#07111f 70%)}
+#pin h2{color:var(--y);font-weight:900;text-shadow:0 0 16px rgba(255,240,74,.6)}
+#pi{color:var(--y);border-color:var(--gold)}
+.c{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0)),rgba(8,20,44,.82);border:1px solid rgba(127,230,255,.25);border-bottom:3px solid var(--gold);border-radius:0;clip-path:polygon(0 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%)}
+h3{color:var(--cy);font-weight:800;letter-spacing:.3px}
+summary,.l{color:#9fc4d8}
+button{border-radius:0;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);background:linear-gradient(180deg,#fff7a8,#ffd23a 60%,#f2b01e);color:#241a00;font-weight:900;transition:transform .12s,filter .12s}
+button:active{transform:scale(.96);filter:brightness(1.15)}
+button.x{background:linear-gradient(180deg,#26406c,#142446);color:#dff6ff}
+button.r{background:linear-gradient(180deg,#ff8db0,#e0345f);color:#fff}
+input,textarea,select{background:#06101f;border:1px solid rgba(127,230,255,.3);border-radius:0;font:inherit}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:2px solid var(--y);outline-offset:1px}
+.n{font-weight:900;font-size:54px;color:#fff;transform:skewX(-8deg);text-shadow:0 0 16px var(--y),0 0 34px rgba(255,240,74,.5)}
+#s{font-weight:800}
+#s.ok{background:linear-gradient(90deg,#0f8a63,#1fbf8c)}
+#pv{background:radial-gradient(ellipse at 20% 0,#1d4c6e,#07111f 70%);border:1px solid rgba(127,230,255,.25)}
+#modes button{background:linear-gradient(180deg,#26406c,#142446);color:#bfe9ff;padding:14px 4px;font-size:14px}
+#modes button.on{background:linear-gradient(180deg,#fff7a8,#ffd23a 60%,#f2b01e);color:#241a00}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
+</style></head><body>
+<div id="pin" style="position:fixed;inset:0;z-index:9;background:#10151f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
+ <h2 style="margin:0">ใส่รหัส PIN</h2>
+ <input id="pi" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" style="width:170px;font-size:34px;text-align:center;letter-spacing:8px"></div>
+<div id="s">กำลังเชื่อมต่อ…</div>
+
+<div class="c"><details open ontoggle="fit()"><summary>ตัวอย่างสกอร์บอร์ด (สดจากหน้าจอจริง)</summary>
+ <div id="pv"><iframe id="pf" src="../display/index2.html?bg"></iframe></div></details></div>
+
+<div id="modes"><button data-m="w" onclick="go('w')">วอร์มอัพ / พักเกม</button><button data-m="g" onclick="go('g')">เกม</button><button data-m="t" onclick="go('t')">ไทม์เอาต์</button></div>
+
+<section class="m" id="m-w" style="display:none">
+ <div class="c"><h3>หัวข้อย่อย (ใต้แบนเนอร์) ค่าเริ่มต้น: warming-up</h3>
+  <textarea id="wl" oninput="S.wl=this.value.split('\n').slice(0,50);send()"></textarea>
+  <div class="l">หลายบรรทัดได้ ใช้เวลาสลับและโหมดเลื่อนเดียวกับแบนเนอร์</div></div>
+ <button class="x" onclick="S.ev='r';S.dur=0;S.tid++;send()">เริ่มจับเวลาวอร์มอัพใหม่</button>
+ <div class="fc" data-k="bst" style="margin-top:8px"></div>
+</section>
+
+<section class="m" id="m-g" style="display:none">
+ <div class="g" id="teams"></div>
+ <div class="c"><h3 id="v"></h3>
+  <div class="g"><button onclick="S.srv=S.srv==null?0:1-S.srv;send()">สลับ</button>
+  <button class="x" onclick="S.hs=!S.hs;send()">ซ่อน / แสดง</button></div></div>
+ <div class="c"><h3 id="sn"></h3>
+  <div class="g"><button onclick="setn(1)">เซตถัดไป +1</button><button class="x" onclick="setn(-1)">ย้อนกลับ -1</button></div></div>
+ <div class="c"><h3>รีเซ็ต</h3>
+  <div class="g"><button class="x" onclick="rs()">รีเซ็ตเซตนี้</button>
+  <button class="r" onclick="confirm('รีเซ็ตคะแนน เซต และไทม์เอาต์ทั้งหมด?')&&ra()">รีเซ็ตทั้งหมด</button></div>
+  <button class="x" onclick="S.ev='r';S.dur=0;S.tid++;send()">เริ่มจับเวลาใหม่</button></div>
+ <div class="c" id="gs"><h3>ตั้งค่า</h3>
+  <div class="g" id="setup"></div>
+  <button class="x" onclick="swap()">สลับฝั่ง</button>
+  <label><input type="checkbox" id="tg" onchange="S.timer=this.checked;send()"> แสดงตัวจับเวลา</label>
+  หยุดเวลาหลังได้แต้ม (วินาที) <input id="ts" type="number" min="1" oninput="S.pz=+this.value||5;send()">
+  ไทม์เอาต์ต่อเซต <input id="tm" type="number" min="1" max="5" oninput="S.tmo=+this.value||2;send()"></div>
+ <div class="fc" data-k="npbte"></div>
+</section>
+
+<section class="m" id="m-t" style="display:none">
+ <div class="c"><h3 id="tth"></h3>
+  <div class="g" id="tpk"><button id="tp0" onclick="startTo(0)"></button><button id="tp1" onclick="startTo(1)"></button></div>
+  <button id="etb" class="r" onclick="go('g')">จบไทม์เอาต์ กลับสู่เกม</button>
+  <button class="x" onclick="S.ev='r';S.dur=0;S.tid++;send()">เริ่มจับเวลาใหม่</button></div>
+ <div class="fc" data-k="npte"></div>
+</section>
+
+<div class="c" id="bn"><h3>แบนเนอร์หลายบรรทัด</h3>
+ <label><input type="checkbox" id="ml" onchange="S.ml=this.checked;send()"> แสดงแบนเนอร์ในหน้าเกม</label>
+ <textarea id="ls" placeholder="พิมพ์ 1 บรรทัดต่อ 1 แบนเนอร์ (ใส่บรรทัดเดียวก็ใช้เป็นหัวข้อได้)" oninput="S.ls=this.value.split('\n').slice(0,50);send()"></textarea>
+ <div class="l" id="lc"></div>
+ สลับทุก (วินาที) <input id="ms" type="number" min="1" oninput="S.ms=Math.max(1,+this.value||5);send()">
+ <label><input type="checkbox" id="as" onchange="S.as=this.checked;send()"> เลื่อนอัตโนมัติ</label>
+ <div class="g"><button class="x" onclick="bn(-1)">◀ บรรทัดก่อนหน้า</button><button class="x" onclick="bn(1)">บรรทัดถัดไป ▶</button></div></div>
+
+<script>onerror=function(m){var s=document.getElementById("s");s.textContent="สคริปต์ผิดพลาด: "+m;s.className="";}</script>
+<script>
+const WS = "wss://volley-board.doramongameing.workers.dev";
+const REPO = "iamshika/vbsb"; // GitHub user/repo that hosts the /fonts folder
+const q = id => document.getElementById(id), EZ = "cubic-bezier(0.109,0.575,0.333,0.974)";
+const FN = { n:"ชื่อทีม", b:"แบนเนอร์", s:"หัวข้อย่อย", p:"คะแนน", t:"ตัวจับเวลา", e:"เซต" };
+let key = localStorage.k || "", ws, got = 0;
+let S = { t:["เหย้า","เยือน"], c:["#ff0033","#19c6ff"], rec:["",""], logo:["",""],
+  sc:[[0,0],[0,0],[0,0],[0,0],[0,0]], set:0, to:[0,0], srv:null, hs:false, timer:true, pz:5, tmo:2, dur:0, tid:0, ev:"r",
+  ml:false, ls:[], ms:5, as:true, li:0, mode:"g", tt:null, wl:["warming-up"],
+  fn:"", fb:"", fs:"", fp:"", ft:"", zn:100, zb:100, zs:100, zp:100, zt:100, fe:"", ze:100 };
+
+q("teams").innerHTML = [0,1].map(i => `<div class="c"><h3 id="h${i}"></h3>
+ <div class="n" id="p${i}"></div><div class="l">คะแนน</div>
+ <div class="g"><button onclick="pt(${i},1)">+1</button><button class="x" onclick="pt(${i},-1)">-1</button></div>
+ <div class="l" id="o${i}" style="margin-top:10px"></div>
+ <div class="g"><button onclick="to(${i},1)">+1</button><button class="x" onclick="to(${i},-1)">-1</button></div></div>`).join("");
+q("setup").innerHTML = [0,1].map(i => `<div>ชื่อทีม ${i+1}<input id="t${i}" oninput="S.t[${i}]=this.value;send()">
+ สถิติ/อันดับ (เว้นว่างได้)<input id="r${i}" oninput="S.rec[${i}]=this.value;send()">
+ สี<input id="c${i}" type="color" oninput="S.c[${i}]=this.value;send()">
+ ลิงก์โลโก้<input id="l${i}" placeholder="https://…" oninput="S.logo[${i}]=this.value;send()"></div>`).join("");
+document.querySelectorAll(".fc").forEach(e => e.innerHTML = `<div class="c"><h3>ฟอนต์และขนาด</h3>` + [...e.dataset.k].map(k =>
+ `<div class="g"><div>${FN[k]}<select data-f="${k}" onchange="S['f${k}']=this.value;send()"></select></div>
+  <div>ขนาด (%)<input data-z="${k}" type="number" min="30" max="400" oninput="S['z${k}']=+this.value||100;send()"></div></div>`).join("") + `</div>`);
+
+const cur = () => S.sc[S.set];
+function stamp(){ S.dur=0; S.ev="r"; S.tid++; } // restart the timer
+function pt(i,d){ const v = cur()[i]+d; if(v<0) return; cur()[i]=v;
+  if(d>0){ S.srv=i; S.hs=false; S.dur=(S.pz||5)*1000; S.ev="p"; S.tid++; } send(); }
+function startTo(i){ if(S.to[i]>=S.tmo && !confirm("ใช้ไทม์เอาต์ครบแล้ว เข้าไทม์เอาต์ต่อไหม?")) return;
+  if(S.to[i]<S.tmo) S.to[i]++; S.tt=i; S.mode="t"; stamp(); send(); }
+function to(i,d){ if(d>0) return startTo(i); S.to[i]=Math.max(0,S.to[i]+d); send(); }
+function go(m){ S.mode=m; if(m!=="t") S.tt=null; stamp(); send(); }
+function setn(d){ S.set=Math.max(0,Math.min(4,S.set+d)); S.to=[0,0]; stamp(); send(); }
+function swap(){ for(const k of ["t","c","rec","logo","to"]) S[k].reverse();
+  S.sc.forEach(r=>r.reverse()); if(S.srv!=null) S.srv=1-S.srv; if(S.tt!=null) S.tt=1-S.tt; fill(); send(); }
+function rs(){ S.sc[S.set]=[0,0]; S.srv=null; stamp(); send(); }
+function ra(){ S.sc=S.sc.map(()=>[0,0]); S.set=0; S.to=[0,0]; S.srv=null; stamp(); send(); }
+function bn(d){ const f = a => a.filter(x=>x.trim()).length, n = Math.max(f(S.ls), f(S.wl), 1); S.li = ((S.li||0)+d+n) % n; send(); }
+
+// switch the visible control section with the same fade/slide curve as the display
+let shown = null, vt = 0;
+function view(m){ if(m === shown) return;
+  const old = shown && q("m-"+shown), nx = q("m-"+m), tk = ++vt, first = !shown; shown = m;
+  document.querySelectorAll("#modes button").forEach(b => b.classList.toggle("on", b.dataset.m === m));
+  const open = () => { if(tk !== vt) return;
+    if(m === "w") q("m-w").append(q("bn")); else if(m === "g") q("m-g").insertBefore(q("bn"), q("gs"));
+    q("bn").style.display = m === "t" ? "none" : ""; nx.style.display = "";
+    nx.animate([{opacity:0,transform:"translateY(14px)"},{opacity:1,transform:"none"}], {duration:first?0:450,easing:EZ}); };
+  if(old) old.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateY(-12px)"}], {duration:220,easing:EZ}).onfinish = () => { old.style.display="none"; open(); };
+  else open(); }
+
+function send(){ if(ws&&ws.readyState==1) ws.send(JSON.stringify({key,state:S})); render(); }
+function fill(){ [0,1].forEach(i=>{ q("t"+i).value=S.t[i]; q("r"+i).value=S.rec[i]; q("c"+i).value=S.c[i]; q("l"+i).value=S.logo[i]; });
+  q("tg").checked=S.timer; q("ts").value=S.pz||5; q("tm").value=S.tmo;
+  q("ml").checked=S.ml; q("ls").value=S.ls.join("\n"); q("wl").value=S.wl.join("\n"); q("ms").value=S.ms; q("as").checked=S.as;
+  document.querySelectorAll("[data-f]").forEach(e=>e.value=S["f"+e.dataset.f]||"");
+  document.querySelectorAll("[data-z]").forEach(e=>e.value=S["z"+e.dataset.z]||100); }
+function render(){ [0,1].forEach(i=>{ q("h"+i).textContent=S.t[i]; q("p"+i).textContent=cur()[i]; q("o"+i).textContent=`ไทม์เอาต์: ${S.to[i]} จาก ${S.tmo}`; q("tp"+i).textContent=S.t[i]+" ขอไทม์เอาต์"; });
+  q("v").textContent = (S.srv==null ? "ยังไม่มีทีมเสิร์ฟ" : S.t[S.srv]+" เสิร์ฟ") + (S.hs?" (ซ่อน)":"");
+  q("sn").textContent = `เซตที่ ${S.set+1} จาก 5`;
+  q("lc").textContent = `${S.ls.filter(x=>x.trim()).length} / 50 บรรทัด`;
+  q("tth").textContent = S.tt==null ? "เลือกทีมที่ขอไทม์เอาต์" : S.t[S.tt]+" ขอไทม์เอาต์";
+  q("tpk").style.display = S.tt==null ? "" : "none"; q("etb").style.display = S.tt==null ? "none" : "";
+  view(S.mode || "g"); }
+function fit(){ const w=q("pv"), k=Math.min(1,w.clientWidth/1100); q("pf").style.transform=`scale(${k})`; w.style.height=(210*k)+"px"; }
+addEventListener("resize",fit);
+
+async function loadFonts(){ let L;
+  try{ const r = await fetch(`https://api.github.com/repos/${REPO}/contents/fonts`); L = (await r.json()).map(f=>f.name); localStorage.fl = JSON.stringify(L); }
+  catch(e){ L = JSON.parse(localStorage.fl || "[]"); }
+  L = L.filter(n=>/\.(ttf|otf)$/i.test(n)).sort();
+  const o = '<option value="">ค่าเริ่มต้น</option>' + L.map(n=>`<option value="${n}">${n.replace(/\.(ttf|otf)$/i,"")}</option>`).join("");
+  document.querySelectorAll("[data-f]").forEach(e => e.innerHTML = o); fill(); }
+
+function conn(){ ws = new WebSocket(WS);
+  ws.onopen = () => { q("s").textContent="ออนไลน์"; q("s").className="ok"; ws.send(JSON.stringify({key,check:1})); };
+  ws.onclose = () => { q("s").textContent="เชื่อมต่อ "+WS+" ไม่ได้ (กำลังลองใหม่)"; q("s").className=""; setTimeout(conn,1000); };
+  ws.onmessage = e => { const d = JSON.parse(e.data);
+    if(d.ok){ if(!got) send(); }
+    else if(d.err){ localStorage.removeItem("k"); alert(d.err==2 ? "ลองผิดหลายครั้งเกินไป รอ 1 นาที" : "PIN ไม่ถูกต้อง"); location.reload(); }
+    else if(got){ if(d.mode !== S.mode || d.tt !== S.tt){ S.mode=d.mode; S.tt=d.tt; render(); } } // another controller changed the mode
+    else { got=1; S={...S,...d}; fill(); render(); } }; }
+fill(); render(); fit(); loadFonts();
+if(key){ q("pin").remove(); conn(); }
+else q("pi").oninput = e => { if(e.target.value.length==4){ key=e.target.value; localStorage.k=key; q("pin").remove(); conn(); } };
+</script></body></html>
