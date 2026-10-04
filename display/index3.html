@@ -34,7 +34,7 @@ body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","No
 #h{display:flex;justify-content:center;margin-top:-1px;flex-wrap:wrap}
 #h div{min-width:92px;text-align:center;padding:6px 10px;font-weight:700;font-size:20px;opacity:.8}
 #h div.cur{opacity:1;border-color:#ffe34d}
-#tm{border-radius:10px 10px 0 0}
+#tm{border-radius:0}
 #g0,#g1,#ug0,#ug1{opacity:0;transform:translateY(14px);transition:opacity .45s var(--ez),transform .55s var(--ez)}
 #g0.on,#g1.on,#ug0.on,#ug1.on{opacity:1;transform:none}
 .d{display:flex;gap:4px;height:14px;align-items:center}
@@ -79,9 +79,10 @@ body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","No
 .sr{font-size:calc(22px*var(--ze,1));font-family:var(--fe,var(--ff))}
 .sw{font-size:calc(30px*var(--ze,1))}
 .w{font-size:calc(26px*var(--ze,1));font-family:var(--fe,var(--ff))}
+</style>
 <style id="skin">
-/* solid skin: flat colors, no glass. Team colors come from the control panel; the rest is this palette */
-:root{--ink:#0a1830;--ink2:#17335f;--gold:#ffc82e;--mint:#2ee6a6;--ice:#eef5ff;--fa:#fff;--fb2:#fff}
+/* solid skin: flat colors, black tiles between the team colors, glow on numbers, banner text and the ball */
+:root{--ink:#06080d;--ink2:#10141f;--gold:#ffc82e;--mint:#2ee6a6;--ice:#eef5ff;--fa:#fff;--fb2:#fff}
 body{text-shadow:none}
 #tm,.t,.w,.p,.dash,#ti,#h div,.gl,.tc{-webkit-backdrop-filter:none;backdrop-filter:none;border:0;box-shadow:none;background:var(--ink)}
 #tm{color:var(--ice)}
@@ -90,14 +91,15 @@ body{text-shadow:none}
 #T1,#U1{background:var(--b);color:var(--fb2)}
 .p{background:var(--ink);color:#fff}
 .w{background:var(--ink2);color:var(--mint)}
-.dash{background:var(--ink2);color:var(--gold)}
+.dash{background:var(--ink2);color:var(--gold);text-shadow:0 0 12px rgba(255,200,46,.8)}
 #p0,#w0{box-shadow:inset 0 -4px 0 var(--a)}
 #p1,#w1{box-shadow:inset 0 -4px 0 var(--b)}
-#ti{background:var(--ice);color:var(--ink)}
+#ti,#wb{background:var(--ink)}
+#ti span,#wb span{background:linear-gradient(90deg,color-mix(in srgb,var(--a) 62%,#fff),#fff 50%,color-mix(in srgb,var(--b) 62%,#fff));-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 8px rgba(255,255,255,.45))}
 #h div{background:var(--ink2);color:var(--ice);opacity:1}
 #h div.cur{background:var(--gold);color:#1a1200}
-.d i{background:currentColor}
-#wb{background:var(--ink);color:#fff}
+.d i{background:currentColor;box-shadow:0 0 6px currentColor}
+.ball{filter:drop-shadow(0 0 7px var(--gold)) drop-shadow(0 0 16px rgba(255,200,46,.65))}
 #ws{background:var(--gold);color:#1a1200}
 #tt{background:var(--tc,#888);color:var(--tf,#fff)}
 .sw{background:var(--ink);color:var(--mint)}
