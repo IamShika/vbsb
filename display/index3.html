@@ -99,6 +99,7 @@ body{text-shadow:none}
 #h div{background:var(--ink2);color:var(--ice);opacity:1}
 #h div.cur{background:var(--gold);color:#1a1200}
 .d i{background:currentColor;box-shadow:0 0 6px currentColor}
+.ball.dk{filter:grayscale(1) brightness(.18) drop-shadow(0 0 3px #fff) drop-shadow(0 0 8px rgba(255,255,255,.7))}
 .ball{filter:drop-shadow(0 0 7px var(--gold)) drop-shadow(0 0 16px rgba(255,200,46,.65))}
 #ws{background:var(--gold);color:#1a1200}
 #tt{background:var(--tc,#888);color:var(--tf,#fff)}
@@ -172,10 +173,12 @@ function font(v, file){
 }
 function curMs(){ if(!T.ok) return 0; const e = Date.now() - T.la; return Math.max(0, T.ev === "p" ? (e < T.dur ? T.fz : e - T.dur) : e); }
 function fg(c){ const n = parseInt(c.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * (n >> 8 & 255) + 0.114 * (n & 255)) > 140 ? "#111a2b" : "#fff"; }
+function nearYellow(c){ const n = parseInt(c.slice(1), 16); return Math.hypot((n >> 16) - 255, (n >> 8 & 255) - 208, (n & 255)) < 150; } // yellow/gold/orange team colors
 function set(id, v){ const el = q(id); if(el.textContent !== String(v)) el.textContent = v; }
 
 function render(d, skip){
   const r = document.documentElement.style; r.setProperty("--a", d.c[0]); r.setProperty("--b", d.c[1]); r.setProperty("--fa", fg(d.c[0])); r.setProperty("--fb2", fg(d.c[1]));
+  [0,1].forEach(i => { const dk = nearYellow(d.c[i]); q("v"+i).classList.toggle("dk", dk); q("ub"+i).classList.toggle("dk", dk); }); // dark ball on yellow-ish teams
   for(const k of "nbspte"){ font("--f"+k, d["f"+k] || ""); document.documentElement.style.setProperty("--z"+k, (d["z"+k] || 100) / 100); }
   let w = [0,0]; d.sc.forEach((s,i) => { if(i < d.set){ if(s[0] > s[1]) w[0]++; else if(s[1] > s[0]) w[1]++; } });
   [0,1].forEach(i => {
