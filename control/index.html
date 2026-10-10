@@ -29,7 +29,7 @@ summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
  <input id="pi" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" style="width:170px;font-size:34px;text-align:center;letter-spacing:8px"></div>
 <div id="s">กำลังเชื่อมต่อ…</div>
 
-<div class="c"><details open ontoggle="fit()"><summary>ตัวอย่างสกอร์บอร์ด (สดจากหน้าจอจริง)</summary>
+<div class="c"><details open ontoggle="window.fit&&fit()"><summary>ตัวอย่างสกอร์บอร์ด (สดจากหน้าจอจริง)</summary>
  <div id="pv"><iframe id="pf" src="../display/"></iframe></div></details></div>
 
 <div id="modes"><button data-m="w" onclick="go('w')">วอร์มอัพ / พักเกม</button><button data-m="g" onclick="go('g')">เกม</button><button data-m="t" onclick="go('t')">ไทม์เอาต์</button></div>
@@ -88,7 +88,7 @@ let key = localStorage.k || "", ws, got = 0;
 let S = { t:["เหย้า","เยือน"], c:["#ff0033","#19c6ff"], rec:["",""], logo:["",""],
   sc:[[0,0],[0,0],[0,0],[0,0],[0,0]], set:0, to:[0,0], srv:null, hs:false, timer:true, pz:5, tmo:2, dur:0, tid:0, ev:"r",
   ml:false, ls:[], ms:5, as:true, li:0, mode:"g", tt:null, wl:["warming-up"],
-  fn:"", fb:"", fs:"", fp:"", ft:"", zn:100, zb:100, zs:100, zp:100, zt:100, fe:"", ze:100 };
+  sw:0, fn:"", fb:"", fs:"", fp:"", ft:"", zn:100, zb:100, zs:100, zp:100, zt:100, fe:"", ze:100 };
 
 q("teams").innerHTML = [0,1].map(i => `<div class="c"><h3 id="h${i}"></h3>
  <div class="n" id="p${i}"></div><div class="l">คะแนน</div>
@@ -97,7 +97,7 @@ q("teams").innerHTML = [0,1].map(i => `<div class="c"><h3 id="h${i}"></h3>
  <div class="g"><button onclick="to(${i},1)">+1</button><button class="x" onclick="to(${i},-1)">-1</button></div></div>`).join("");
 q("setup").innerHTML = [0,1].map(i => `<div>ชื่อทีม ${i+1}<input id="t${i}" oninput="S.t[${i}]=this.value;send()">
  สถิติ/อันดับ (เว้นว่างได้)<input id="r${i}" oninput="S.rec[${i}]=this.value;send()">
- สี<input id="c${i}" type="color" oninput="S.c[${i}]=this.value;send()">
+ สี<input id="c${i}" type="color" oninput="S.c[${i}]=this.value;sendSoon()">
  ลิงก์โลโก้<input id="l${i}" placeholder="https://…" oninput="S.logo[${i}]=this.value;send()"></div>`).join("");
 document.querySelectorAll(".fc").forEach(e => e.innerHTML = `<div class="c"><h3>ฟอนต์และขนาด</h3>` + [...e.dataset.k].map(k =>
  `<div class="g"><div>${FN[k]}<select data-f="${k}" onchange="S['f${k}']=this.value;send()"></select></div>
@@ -112,7 +112,7 @@ function startTo(i){ if(S.to[i]>=S.tmo && !confirm("ใช้ไทม์เอ�
 function to(i,d){ if(d>0) return startTo(i); S.to[i]=Math.max(0,S.to[i]+d); send(); }
 function go(m){ S.mode=m; if(m!=="t") S.tt=null; stamp(); send(); }
 function setn(d){ S.set=Math.max(0,Math.min(4,S.set+d)); S.to=[0,0]; stamp(); send(); }
-function swap(){ for(const k of ["t","c","rec","logo","to"]) S[k].reverse();
+function swap(){ S.sw = Date.now(); for(const k of ["t","c","rec","logo","to"]) S[k].reverse();
   S.sc.forEach(r=>r.reverse()); if(S.srv!=null) S.srv=1-S.srv; if(S.tt!=null) S.tt=1-S.tt; fill(); send(); }
 function rs(){ S.sc[S.set]=[0,0]; S.srv=null; stamp(); send(); }
 function ra(){ S.sc=S.sc.map(()=>[0,0]); S.set=0; S.to=[0,0]; S.srv=null; stamp(); send(); }
@@ -130,6 +130,7 @@ function view(m){ if(m === shown) return;
   if(old) old.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateY(-12px)"}], {duration:220,easing:EZ}).onfinish = () => { old.style.display="none"; open(); };
   else open(); }
 
+let st; function sendSoon(){ clearTimeout(st); st = setTimeout(send, 300); } // colour picker fires continuously: send once it settles
 function send(){ if(ws&&ws.readyState==1) ws.send(JSON.stringify({key,state:S})); render(); }
 function fill(){ [0,1].forEach(i=>{ q("t"+i).value=S.t[i]; q("r"+i).value=S.rec[i]; q("c"+i).value=S.c[i]; q("l"+i).value=S.logo[i]; });
   q("tg").checked=S.timer; q("ts").value=S.pz||5; q("tm").value=S.tmo;
