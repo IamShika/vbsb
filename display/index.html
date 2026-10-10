@@ -6,8 +6,6 @@
 :root{--a:#ff0033;--b:#19c6ff;--ez:cubic-bezier(0.109,0.575,0.333,0.974)}
 body{margin:0;background:transparent;color:#fff;font-family:"Noto Sans Thai","Noto Sans",system-ui,sans-serif;text-shadow:0 1px 6px rgba(0,0,0,.35)}
 #w{width:min(100vw,1100px);margin:0 auto;opacity:0;transition:opacity .6s var(--ez)}
-/* infused glass: blurred backdrop + soft sheen + thin bright edge, square corners */
-#tm,.t,.w,.p,.dash,#ti,#h div,.gl,.tc{-webkit-backdrop-filter:blur(14px) saturate(1.6) brightness(1.2);backdrop-filter:blur(14px) saturate(1.6) brightness(1.2);border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 60%),rgba(12,22,44,.45)}
 #tm{width:130px;margin:0 auto;text-align:center;font-weight:700;font-size:28px;line-height:1.3;transition:color .3s var(--ez)}
 #tm.pz{color:#2b1d00;text-shadow:none;border-color:#ffe08a;background:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,0) 60%),rgba(255,190,20,.92)}
 #r{display:flex;height:76px;margin-top:-1px}
@@ -140,15 +138,16 @@ function roll(el, v, skip, u){
   if(skip){ old.textContent = v; return; }
   const up = u === undefined ? +v > +old.textContent : u, n = document.createElement("span"); n.textContent = v; el.appendChild(n);
   const o = { duration: RM ? 0 : 450, easing: EZ, fill: "both" };
-  n.animate([{ transform: `translateY(${up ? "100%" : "-100%"})`, opacity: 0 }, { transform: "none", opacity: 1 }], o);
+  n.animate([{ transform: `translateY(${up ? "100%" : "-100%"})`, opacity: 0 }, { transform: "none", opacity: 1 }], o).onfinish = e => e.target.cancel();
   old.animate([{ transform: "none", opacity: 1 }, { transform: `translateY(${up ? "-100%" : "100%"})`, opacity: 0 }], o).onfinish = () => old.remove();
 }
 // banner / subheader lines rotate on server time so every screen shows the same line
-function pick(L, d){ L = (L || []).map(x => x.trim()).filter(Boolean); if(!L.length) return "";
+const clean = L => (L || []).map(x => x.trim()).filter(Boolean);
+function pick(L, d){ if(!L.length) return "";
   return L[(d.as ? Math.floor((Date.now() + off) / (1000 * (d.ms || 5))) : (d.li || 0)) % L.length]; }
 function tickB(skip){
   if(!D) return;
-  [["ti", D.ml ? pick(D.ls, D) : ""], ["wb", pick(D.ls, D)], ["ws", pick(D.wl, D)]].forEach(([id, b]) => {
+  [["ti", D.ml ? pick(D._ls, D) : ""], ["wb", pick(D._ls, D)], ["ws", pick(D._wl, D)]].forEach(([id, b]) => {
     if(b === CB[id]) return; CB[id] = b; const el = q(id), hid = el.style.display === "none";
     el.style.display = b ? "" : "none"; if(b) roll(el, b, skip || hid, true); });
 }
@@ -188,6 +187,7 @@ function set(id, v){ const el = q(id); if(el.textContent !== String(v)) el.textC
 // Every team block has a .fl wrapper that holds colour layers over a black base. A colour change slides the
 // old layer up and out while the new one rises in; the text inside follows the same moving edge, switching
 // between white and dark contrast exactly where the edge crosses it.
+let ZV = {}, BC = [];
 const PC = new Map();   // wrapper -> colour it shows (or is sliding to); null = black
 let HOLD = false;       // true while the swap sequence drives the colours
 function mkLayer(c){ const l = document.createElement("div"); l.className = "fc"; l.style.background = c; return l; }
@@ -252,11 +252,12 @@ async function swapSeq(d){
 
 function render(d, skip){
   const r = document.documentElement.style; // banner gradient fades to the new team colours
-  if(skip) r.transition = "none"; r.setProperty("--ba", d.c[0]); r.setProperty("--bb", d.c[1]); if(skip){ void document.documentElement.offsetWidth; r.transition = ""; }
+  if(BC[0] !== d.c[0] || BC[1] !== d.c[1]){ BC = [d.c[0], d.c[1]];
+    if(skip) r.transition = "none"; r.setProperty("--ba", d.c[0]); r.setProperty("--bb", d.c[1]); if(skip){ void document.documentElement.offsetWidth; r.transition = ""; } }
   if(!HOLD) targets(d).forEach(([fl, c]) => skip ? paint(fl, c) : slide(fl, c));
   [0,1].forEach(i => { const dk = fg(d.c[i]) !== "#fff", s = dk ? "../img/vbblk.png" : "../img/vb.png"; // black ball image on yellow-ish teams
     ["v", "ub"].forEach(p => { const e = q(p+i); e.classList.toggle("dk", dk); if(e.getAttribute("src") !== s) e.setAttribute("src", s); }); });
-  for(const k of "nbspte"){ font("--f"+k, d["f"+k] || ""); document.documentElement.style.setProperty("--z"+k, (d["z"+k] || 100) / 100); }
+  for(const k of "nbspte"){ font("--f"+k, d["f"+k] || ""); const z = (d["z"+k] || 100) / 100; if(ZV[k] !== z){ ZV[k] = z; document.documentElement.style.setProperty("--z"+k, z); } }
   let w = [0,0]; d.sc.forEach((s,i) => { if(i < d.set){ if(s[0] > s[1]) w[0]++; else if(s[1] > s[0]) w[1]++; } });
   [0,1].forEach(i => {
     set("n"+i, d.t[i]); set("c"+i, d.rec[i] || ""); q("c"+i).style.display = (d.rec[i] || "").trim() ? "" : "none"; roll(q("p"+i), d.sc[d.set][i], skip); roll(q("w"+i), w[i], skip);
@@ -265,7 +266,7 @@ function render(d, skip){
     logo(i, d.logo[i] || "");
     q("v"+i).classList.toggle("on", d.srv === i && !d.hs);
   });
-  if(d.now) off = d.now - Date.now(); D = d; tickB(skip);
+  if(d.now) off = d.now - Date.now(); D = d; d._ls = clean(d.ls); d._wl = clean(d.wl); tickB(skip);
   q("ttx").textContent = d.tt == null ? "ไทม์เอาต์" : "ไทม์เอาต์ · " + d.t[d.tt];
   [0,1].forEach(i => { q("ub"+i).classList.toggle("on", d.srv === i && !d.hs); set("un"+i, d.t[i]); roll(q("up"+i), d.sc[d.set][i], skip); roll(q("uw"+i), w[i], skip); });
   setMode(d.mode || "g", skip);
@@ -282,11 +283,14 @@ function render(d, skip){
 }
 
 // timer: counts up during a rally, freezes when a team scores, then restarts from 0:00
+let lastTm = "", lastGold = null; // every page write forces a repaint of the overlay, so only write on change
 setInterval(() => { let m = 0, pz = false;
   if(T.ok){ const e = Date.now() - T.la;
     if(T.ev === "p"){ if(e < T.dur){ m = T.fz; pz = true; } else m = e - T.dur; } else m = e; }
   const s = Math.floor(Math.max(0, m) / 1000);
-  q("tm").textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); T.pz = pz; q("tm").classList.toggle("pz", pz || MV === "t"); tickB(false); }, 100);
+  const txt = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); if(txt !== lastTm){ lastTm = txt; q("tm").textContent = txt; }
+  T.pz = pz; const gold = pz || MV === "t"; if(gold !== lastGold){ lastGold = gold; q("tm").classList.toggle("pz", gold); }
+  tickB(false); }, 100);
 
 render({t:["เหย้า","เยือน"],c:["#ff0033","#19c6ff"],rec:["",""],ml:false,ls:[],wl:[],mode:"g",tt:null,logo:["",""],sc:[[0,0],[0,0],[0,0],[0,0],[0,0]],set:0,to:[0,0],srv:null,hs:false,title:"",timer:true,tmo:2,dur:0,ev:"r",now:0,at:0}, true);
 function conn(){ const ws = new WebSocket(WS); first = true; // a fresh connection shows the current state without animating
