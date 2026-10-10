@@ -12,7 +12,7 @@ button:active{filter:brightness(1.4)}
 .x{background:#3b4562}.r{background:#d63a3a}
 input,textarea,select{width:100%;box-sizing:border-box;padding:9px;margin:3px 0;background:#10151f;color:#fff;border:1px solid #334;border-radius:6px;font:inherit}
 textarea{min-height:110px}
-input[type=color]{height:40px;padding:2px}input[type=checkbox]{width:auto}
+input[type=checkbox]{width:auto}
 .n{font-size:44px;text-align:center;font-weight:700}
 .l{text-align:center;color:#9bb}
 summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
@@ -23,6 +23,23 @@ summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
 #modes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
 #modes button{margin:0;background:#2a3350;transition:background .4s,color .4s}
 #modes button.on{background:#ffb800;color:#201500;font-weight:700}
+.cp{margin:3px 0}
+.cpbar{display:flex;gap:6px;align-items:center}
+.cpsw{width:44px;height:40px;flex:none;margin:0;padding:0;border:2px solid #4a5578;border-radius:6px;background:#888}
+.cpcode{margin:0;min-width:0;font-family:ui-monospace,Menlo,monospace}
+.cpcode.bad{border-color:#d63a3a;background:#2a1418}
+.cppanel{margin-top:6px}
+.cpsv{position:relative;height:130px;border-radius:6px;touch-action:none;cursor:crosshair;outline-offset:2px;background:linear-gradient(to top,#000,rgba(0,0,0,0)),linear-gradient(to right,#fff,hsl(var(--h,0),100%,50%))}
+.cph{position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #000,inset 0 0 0 1px #000;pointer-events:none}
+.cphue{-webkit-appearance:none;appearance:none;width:100%;height:20px;margin:8px 0;padding:0;border:0;border-radius:10px;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
+.cphue::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;border:2px solid #000}
+.cphue::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #000}
+.cprgb{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.cprgb label{font-size:12px;color:#9bb;text-align:center}
+.cprgb input{margin:0;padding:8px 2px;text-align:center}
+.cprec{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:6px}
+.cpr{margin:0;padding:0;height:32px;border:1px solid #556;border-radius:5px;background:#10151f}
+.cpr.e{border-style:dashed;opacity:.45}
 </style></head><body>
 <div id="pin" style="position:fixed;inset:0;z-index:9;background:#10151f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
  <h2 style="margin:0">ใส่รหัส PIN</h2>
@@ -55,6 +72,7 @@ summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
   <button class="x" onclick="S.ev='r';S.dur=0;S.tid++;send()">เริ่มจับเวลาใหม่</button></div>
  <div class="c" id="gs"><h3>ตั้งค่า</h3>
   <div class="g" id="setup"></div>
+  <div class="l" style="font-size:12px;margin:4px 0 8px">ช่องสีรับรหัส เช่น #ff0033, rgb(255,0,51), hsl(350,100%,50%) หรือชื่อสี เช่น gold</div>
   <button class="x" onclick="swap()">สลับฝั่ง</button>
   <label><input type="checkbox" id="tg" onchange="S.timer=this.checked;send()"> แสดงตัวจับเวลา</label>
   หยุดเวลาหลังได้แต้ม (วินาที) <input id="ts" type="number" min="1" oninput="S.pz=+this.value||5;send()">
@@ -97,12 +115,69 @@ q("teams").innerHTML = [0,1].map(i => `<div class="c"><h3 id="h${i}"></h3>
  <div class="g"><button onclick="to(${i},1)">+1</button><button class="x" onclick="to(${i},-1)">-1</button></div></div>`).join("");
 q("setup").innerHTML = [0,1].map(i => `<div>ชื่อทีม ${i+1}<input id="t${i}" oninput="S.t[${i}]=this.value;send()">
  สถิติ/อันดับ (เว้นว่างได้)<input id="r${i}" oninput="S.rec[${i}]=this.value;send()">
- สี<input id="c${i}" type="color" oninput="S.c[${i}]=this.value;sendSoon()">
+ สี<div class="cp" id="cp${i}"></div>
  ลิงก์โลโก้<input id="l${i}" placeholder="https://…" oninput="S.logo[${i}]=this.value;send()"></div>`).join("");
 document.querySelectorAll(".fc").forEach(e => e.innerHTML = `<div class="c"><h3>ฟอนต์และขนาด</h3>` + [...e.dataset.k].map(k =>
  `<div class="g"><div>${FN[k]}<select data-f="${k}" onchange="S['f${k}']=this.value;send()"></select></div>
   <div>ขนาด (%)<input data-z="${k}" type="number" min="30" max="400" oninput="S['z${k}']=+this.value||100;send()"></div></div>`).join("") + `</div>`);
 
+// ---- colour picker: type a code, drag the square, or tap a recent colour. Sends once when you finish. ----
+const hx = n => (n < 16 ? "0" : "") + n.toString(16), toHex = c => "#" + hx(c[0]) + hx(c[1]) + hx(c[2]), clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+function hsv2rgb(h, s, v){ const f = n => { const k = (n + h / 60) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); }; return [f(5), f(3), f(1)].map(x => Math.round(x * 255)); }
+function hsl2rgb(h, s, l){ s /= 100; l /= 100; const a = s * Math.min(l, 1 - l), f = n => { const k = (n + h / 30) % 12; return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)); }; return [f(0), f(8), f(4)].map(x => Math.round(x * 255)); }
+function rgb2hsv(r, g, b){ r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), d = mx - Math.min(r, g, b); let h = 0;
+  if(d){ h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; if(h < 0) h += 360; } return [h, mx ? d / mx : 0, mx]; }
+let probe; // understands: #f03, #ff0033, ff0033, rgb(255,0,51), 255 0 51, hsl(350,100%,50%), colour names like gold. strict = only complete forms (used while typing)
+function parseColor(str, strict){
+  const s = String(str).trim().toLowerCase(); if(!s) return null;
+  let m = s.match(/^#?([0-9a-f]{6})$/) || (!strict && s.match(/^#?([0-9a-f]{3})$/));
+  if(m){ let x = m[1]; if(x.length === 3) x = x.replace(/./g, c => c + c); const n = parseInt(x, 16); return [n >> 16, n >> 8 & 255, n & 255]; }
+  m = s.match(/^(?:rgb\(\s*)?(\d{1,3})\s*[,\s]\s*(\d{1,3})\s*[,\s]\s*(\d{1,3})\s*\)?$/);
+  if(m) return [m[1], m[2], m[3]].map(x => clamp(+x, 0, 255));
+  m = s.match(/^hsl\(\s*(\d{1,3})(?:deg)?\s*[,\s]\s*(\d{1,3})%?\s*[,\s]\s*(\d{1,3})%?\s*\)$/);
+  if(m) return hsl2rgb(+m[1] % 360, clamp(+m[2], 0, 100), clamp(+m[3], 0, 100));
+  if(strict || !/^[a-z]+$/.test(s) || /^(transparent|currentcolor|inherit|initial|unset|revert)$/.test(s)) return null;
+  probe = probe || document.createElement("i"); probe.style.color = ""; probe.style.color = s; if(!probe.style.color) return null;
+  document.body.appendChild(probe); const c = getComputedStyle(probe).color.match(/\d+/g); probe.remove(); return c ? c.slice(0, 3).map(Number) : null;
+}
+let RC = []; try{ RC = JSON.parse(localStorage.rc || "[]").filter(c => /^#[0-9a-f]{6}$/.test(c)).slice(0, 5); }catch(e){}
+const PK = [];
+function pushRecent(hex){ RC = [hex, ...RC.filter(c => c !== hex)].slice(0, 5); try{ localStorage.rc = JSON.stringify(RC); }catch(e){} PK.forEach(p => p.recent()); }
+function makePicker(i){
+  const root = q("cp" + i);
+  root.innerHTML = `<div class="cpbar"><button type="button" class="cpsw" aria-label="เปิดตัวเลือกสี" aria-expanded="false"></button><input class="cpcode" maxlength="30" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="รหัสสี" placeholder="#ff0033"></div>
+<div class="cppanel" hidden><div class="cpsv" tabindex="0" aria-label="ความสดและความสว่าง"><i class="cph"></i></div><input class="cphue" type="range" min="0" max="360" step="1" aria-label="เฉดสี">
+<div class="cprgb"><label>R<input type="number" min="0" max="255" inputmode="numeric"></label><label>G<input type="number" min="0" max="255" inputmode="numeric"></label><label>B<input type="number" min="0" max="255" inputmode="numeric"></label></div></div>
+<div class="cprec" aria-label="สีที่ใช้ล่าสุด"></div>`;
+  const $ = x => root.querySelector(x), sw = $(".cpsw"), code = $(".cpcode"), pn = $(".cppanel"), sv = $(".cpsv"), hd = $(".cph"), hue = $(".cphue"), rec = $(".cprec"), rgbIn = [...root.querySelectorAll(".cprgb input")];
+  let h = 0, s = 1, v = 1, ex = null, raf = 0, kt = 0;       // ex = the exact colour when it came from a code (avoids rounding drift)
+  const rgb = () => ex || hsv2rgb(h, s, v), read = () => rgbIn.map(x => clamp(parseInt(x.value, 10) || 0, 0, 255));
+  function paint(){ const c = rgb(), hex = toHex(c);          // only touches what changed on screen; never the field being typed in
+    sw.style.background = hex; sv.style.setProperty("--h", Math.round(h)); hd.style.left = s * 100 + "%"; hd.style.top = (1 - v) * 100 + "%"; hue.value = Math.round(h);
+    rgbIn.forEach((e, k) => { if(document.activeElement !== e) e.value = c[k]; }); if(document.activeElement !== code) code.value = hex; }
+  function set(c, commit){ const t = rgb2hsv(c[0], c[1], c[2]); if(t[1] > 0 && t[2] > 0) h = t[0]; s = t[1]; v = t[2]; ex = c; paint(); if(commit) done(); }
+  function done(){ const hex = toHex(rgb()); if(S.c[i] !== hex){ S.c[i] = hex; sendSoon(); } pushRecent(hex); }
+  function recent(){ let o = ""; for(let k = 0; k < 5; k++){ const c = RC[k]; o += c ? `<button type="button" class="cpr" data-c="${c}" style="background:${c}" aria-label="${c}"></button>` : `<button type="button" class="cpr e" disabled aria-hidden="true"></button>`; } rec.innerHTML = o; }
+  function close(){ pn.hidden = true; sw.setAttribute("aria-expanded", "false"); }
+  const svMove = e => { const r = sv.getBoundingClientRect(); s = clamp((e.clientX - r.left) / r.width, 0, 1); v = 1 - clamp((e.clientY - r.top) / r.height, 0, 1); ex = null; if(!raf) raf = requestAnimationFrame(() => { raf = 0; paint(); }); };
+  sv.onpointerdown = e => { sv.setPointerCapture(e.pointerId); svMove(e); sv.onpointermove = svMove; };
+  sv.onpointerup = sv.onpointercancel = () => { sv.onpointermove = null; if(raf){ cancelAnimationFrame(raf); raf = 0; } paint(); done(); };
+  sv.onkeydown = e => { const d = e.shiftKey ? .1 : .01; let ok = true;
+    if(e.key === "ArrowLeft") s = clamp(s - d, 0, 1); else if(e.key === "ArrowRight") s = clamp(s + d, 0, 1); else if(e.key === "ArrowUp") v = clamp(v + d, 0, 1); else if(e.key === "ArrowDown") v = clamp(v - d, 0, 1); else ok = false;
+    if(ok){ e.preventDefault(); ex = null; paint(); clearTimeout(kt); kt = setTimeout(done, 500); } };
+  hue.oninput = () => { h = +hue.value; ex = null; paint(); }; hue.onchange = done;
+  rgbIn.forEach(e => { e.oninput = () => set(read(), false); e.onchange = () => { set(read(), true); rgbIn.forEach((x, k) => x.value = rgb()[k]); }; });
+  code.onfocus = () => code.select();
+  code.oninput = () => { const c = parseColor(code.value, true); if(c) set(c, false); };
+  code.onchange = () => { const c = parseColor(code.value);
+    if(c){ set(c, true); code.value = toHex(rgb()); code.classList.remove("bad"); }
+    else { code.classList.add("bad"); setTimeout(() => { code.classList.remove("bad"); code.value = toHex(rgb()); }, 900); } };
+  sw.onclick = () => { const open = pn.hidden; PK.forEach(p => p.close()); if(open){ pn.hidden = false; sw.setAttribute("aria-expanded", "true"); } };
+  rec.onclick = e => { const b = e.target.closest("button[data-c]"); if(b) set(parseColor(b.dataset.c, true), true); };
+  recent(); paint();
+  return { ext(hex){ const c = parseColor(hex, true); if(c) set(c, false); }, recent, close };
+}
+[0,1].forEach(i => PK[i] = makePicker(i));
 const cur = () => S.sc[S.set];
 function stamp(){ S.dur=0; S.ev="r"; S.tid++; } // restart the timer
 function pt(i,d){ const v = cur()[i]+d; if(v<0) return; cur()[i]=v;
@@ -132,7 +207,7 @@ function view(m){ if(m === shown) return;
 
 let st; function sendSoon(){ clearTimeout(st); st = setTimeout(send, 300); } // colour picker fires continuously: send once it settles
 function send(){ if(ws&&ws.readyState==1) ws.send(JSON.stringify({key,state:S})); render(); }
-function fill(){ [0,1].forEach(i=>{ q("t"+i).value=S.t[i]; q("r"+i).value=S.rec[i]; q("c"+i).value=S.c[i]; q("l"+i).value=S.logo[i]; });
+function fill(){ [0,1].forEach(i=>{ q("t"+i).value=S.t[i]; q("r"+i).value=S.rec[i]; PK[i]&&PK[i].ext(S.c[i]); q("l"+i).value=S.logo[i]; });
   q("tg").checked=S.timer; q("ts").value=S.pz||5; q("tm").value=S.tmo;
   q("ml").checked=S.ml; q("ls").value=S.ls.join("\n"); q("wl").value=S.wl.join("\n"); q("ms").value=S.ms; q("as").checked=S.as;
   document.querySelectorAll("[data-f]").forEach(e=>e.value=S["f"+e.dataset.f]||"");
