@@ -87,23 +87,31 @@ body{text-shadow:none}
 #tm,.t,.w,.p,.dash,#ti,#h div,.gl,.tc{-webkit-backdrop-filter:none;backdrop-filter:none;border:0;box-shadow:none;background:var(--ink)}
 #tm{color:var(--ice)}
 #tm.pz{background:var(--gold);color:#1a1200}
-#T0,#U0{background:var(--a);color:var(--fa)}
-#T1,#U1{background:var(--b);color:var(--fb2)}
+#T0,#T1,#U0,#U1{background:var(--ink);color:#fff}
 .p{background:var(--ink);color:#fff}
 .w{background:var(--ink2);color:var(--mint)}
 .dash{background:var(--ink2);color:var(--gold);text-shadow:0 0 12px rgba(255,200,46,.8)}
-#p0,#w0{box-shadow:inset 0 -4px 0 var(--a)}
-#p1,#w1{box-shadow:inset 0 -4px 0 var(--b)}
 #ti,#wb{background:var(--ink)}
-#ti span,#wb span{background:linear-gradient(90deg,color-mix(in srgb,var(--a) 62%,#fff),#fff 50%,color-mix(in srgb,var(--b) 62%,#fff));-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 8px rgba(255,255,255,.45))}
+#ti span,#wb span{background:linear-gradient(90deg,color-mix(in srgb,var(--ba) 62%,#fff),#fff 50%,color-mix(in srgb,var(--bb) 62%,#fff));-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 8px rgba(255,255,255,.45))}
 #h div{background:var(--ink2);color:var(--ice);opacity:1}
 #h div.cur{background:var(--gold);color:#1a1200}
 .d i{background:currentColor;box-shadow:0 0 6px currentColor}
 .ball.dk{filter:none}
 .ball{filter:drop-shadow(0 0 7px var(--gold)) drop-shadow(0 0 16px rgba(255,200,46,.65))}
 #ws{background:var(--gold);color:#1a1200}
-#tt{background:var(--tc,#888);color:var(--tf,#fff)}
+#tt{background:var(--ink);color:#fff}
 .sw{background:var(--ink);color:var(--mint)}
+@property --bp{syntax:'<length>';inherits:true;initial-value:0px}
+@property --ba{syntax:'<color>';inherits:true;initial-value:#ff0033}
+@property --bb{syntax:'<color>';inherits:true;initial-value:#19c6ff}
+:root{--ba:#ff0033;--bb:#19c6ff;transition:--ba .7s var(--ez),--bb .7s var(--ez)}
+.t,.tc,#tt,.p,.w{position:relative;isolation:isolate}
+.fl{position:absolute;inset:0;overflow:hidden;z-index:-1;pointer-events:none}
+.fl.bar{inset:auto 0 0 0;height:4px}
+.fc{position:absolute;inset:0}
+.wp .gt,.wp .big span{background:linear-gradient(to bottom,var(--fo,#fff) calc(var(--bp) - var(--y0,0px)),var(--fw,#fff) calc(var(--bp) - var(--y0,0px)));-webkit-background-clip:text;background-clip:text;color:transparent}
+.wp .d i{background:linear-gradient(to bottom,var(--fo,#fff) calc(var(--bp) - var(--y0,0px)),var(--fw,#fff) calc(var(--bp) - var(--y0,0px)))}
+.wp .gt{padding-block:.18em;margin-block:-.18em}
 </style></head><body>
 <div id="w">
  <div id="tm">0:00</div>
@@ -117,7 +125,7 @@ body{text-shadow:none}
  <div id="h"><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div><div style="display:none"><span>0 - 0</span></div></div>
 </div>
 <div class="v" id="vw" style="display:none"><div id="wb" class="gl" style="display:none"><span></span></div><div id="ws" class="gl" style="display:none"><span></span></div></div>
-<div class="v" id="vt" style="display:none"><div id="tt" class="gl">ไทม์เอาต์</div><div id="tr"><div class="tc" id="U0"><div class="th"><img id="ug0" style="display:none"><b id="un0"></b><img class="ball" id="ub0" src="../img/vb.png" alt=""></div><div class="tsr"><div class="big" id="up0"><span>0</span></div><div class="sr">เซต<div class="sw" id="uw0"><span>0</span></div></div></div></div><div class="tc" id="U1"><div class="th"><img class="ball" id="ub1" src="../img/vb.png" alt=""><b id="un1"></b><img id="ug1" style="display:none"></div><div class="tsr"><div class="big" id="up1"><span>0</span></div><div class="sr">เซต<div class="sw" id="uw1"><span>0</span></div></div></div></div></div></div>
+<div class="v" id="vt" style="display:none"><div id="tt" class="gl"><span id="ttx" class="gt">ไทม์เอาต์</span></div><div id="tr"><div class="tc" id="U0"><div class="th"><img id="ug0" style="display:none"><b id="un0"></b><img class="ball" id="ub0" src="../img/vb.png" alt=""></div><div class="tsr"><div class="big" id="up0"><span>0</span></div><div class="sr"><span class="gt">เซต</span><div class="sw" id="uw0"><span>0</span></div></div></div></div><div class="tc" id="U1"><div class="th"><img class="ball" id="ub1" src="../img/vb.png" alt=""><b id="un1"></b><img id="ug1" style="display:none"></div><div class="tsr"><div class="big" id="up1"><span>0</span></div><div class="sr"><span class="gt">เซต</span><div class="sw" id="uw1"><span>0</span></div></div></div></div></div></div>
 </div>
 </div>
 <script>
@@ -176,45 +184,79 @@ function fg(c){ const n = parseInt(c.slice(1), 16); return (0.299 * (n >> 16) + 
 new Image().src = "../img/vbblk.png"; // preload so the swap never flickers
 function set(id, v){ const el = q(id); if(el.textContent !== String(v)) el.textContent = v; }
 
+// ---- team colour fills ---------------------------------------------------------------
+// Every team block has a .fl wrapper that holds colour layers over a black base. A colour change slides the
+// old layer up and out while the new one rises in; the text inside follows the same moving edge, switching
+// between white and dark contrast exactly where the edge crosses it.
+const PC = new Map();   // wrapper -> colour it shows (or is sliding to); null = black
+let HOLD = false;       // true while the swap sequence drives the colours
+function mkLayer(c){ const l = document.createElement("div"); l.className = "fc"; l.style.background = c; return l; }
+function visible(el){ return !!(el.offsetWidth || el.offsetHeight); }
+function fin(fl){ if(fl._fin) fl._fin(); }
+function cur(fl){ return fl._fin ? fl._to : (PC.has(fl) ? PC.get(fl) : null); }
+function paint(fl, c){   // instant, no animation
+  fin(fl); fl.replaceChildren(); if(c) fl.appendChild(mkLayer(c)); PC.set(fl, c);
+  if(!fl.classList.contains("bar")) fl.parentElement.style.color = c ? fg(c) : "#fff";
+}
+function slide(fl, to){  // null = black. Resolves when the slide has finished.
+  if(cur(fl) === to) return Promise.resolve();
+  fin(fl);
+  const from = PC.has(fl) ? PC.get(fl) : null, bar = fl.classList.contains("bar"), o = fl.parentElement;
+  if(RM || !visible(fl)){ paint(fl, to); return Promise.resolve(); }
+  return new Promise(res => {
+    const down = to === null, opt = { duration: 600, easing: EZ, fill: "both" }, an = [];
+    const oldL = fl.lastElementChild, newL = to ? mkLayer(to) : null;
+    if(newL){ fl.appendChild(newL); an.push(newL.animate([{ transform: "translateY(100%)" }, { transform: "none" }], opt)); }
+    if(oldL) an.push(oldL.animate([{ transform: "none" }, { transform: down ? "translateY(100%)" : "translateY(-100%)" }], opt));
+    let nodes = [];
+    if(!bar){ // text: above the edge / below the edge get their own contrast colour
+      const f0 = from ? fg(from) : "#fff", f1 = to ? fg(to) : "#fff", H = o.offsetHeight;
+      o.style.setProperty("--fo", down ? f1 : f0); o.style.setProperty("--fw", down ? f0 : f1);
+      o.classList.add("wp");
+      const top = o.getBoundingClientRect().top; nodes = [...o.querySelectorAll(".gt, .big, .d")];
+      nodes.forEach(n => n.style.setProperty("--y0", (n.getBoundingClientRect().top - top) + "px"));
+      an.push(o.animate([{ "--bp": (down ? 0 : H) + "px" }, { "--bp": (down ? H : 0) + "px" }], opt));
+    }
+    const done = () => { if(fl._fin !== done) return; fl._fin = null; an.forEach(a => a.cancel());
+      if(oldL) oldL.remove(); if(!to) fl.replaceChildren();
+      if(!bar){ o.classList.remove("wp"); nodes.forEach(n => n.style.removeProperty("--y0")); o.style.color = to ? fg(to) : "#fff"; }
+      PC.set(fl, to); res(); };
+    fl._to = to; fl._fin = done; an[0].onfinish = done;
+  });
+}
+const fillOf = id => q(id).firstElementChild;
+function targets(d){ const L = [];
+  [0,1].forEach(i => ["T"+i, "U"+i, "p"+i, "w"+i].forEach(id => L.push([fillOf(id), d.c[i]])));
+  L.push([fillOf("tt"), d.tt == null ? "#888" : d.c[d.tt]]); return L; }
+function addFl(id, bar){ const f = document.createElement("div"); f.className = "fl" + (bar ? " bar" : ""); q(id).prepend(f); }
+[0,1].forEach(i => { addFl("T"+i); addFl("U"+i); addFl("p"+i, 1); addFl("w"+i, 1); ["n"+i, "c"+i, "un"+i].forEach(id => q(id).classList.add("gt")); });
+addFl("tt");
+
+// swap sides: colours slide down to black, names/scores/logos change behind the black, new colours slide up
+let SW = null, busy = false, queued = null;
+function recv(d){
+  if(busy){ queued = d; return; }
+  const sw = d.sw || 0;
+  if(first){ first = false; SW = sw; render(d, true); return; }
+  if(sw !== SW){ SW = sw; swapSeq(d); return; }
+  render(d, false);
+}
+async function swapSeq(d){
+  busy = true; HOLD = true;
+  await Promise.all(targets(d).map(([fl]) => slide(fl, null)));
+  render(d, true);
+  await Promise.all(targets(d).map(([fl, c]) => slide(fl, c)));
+  HOLD = false; busy = false;
+  if(queued){ const n = queued; queued = null; recv(n); }
+}
+
 function render(d, skip){
-  const r = document.documentElement.style; r.setProperty("--a", d.c[0]); r.setProperty("--b", d.c[1]); r.setProperty("--fa", fg(d.c[0])); r.setProperty("--fb2", fg(d.c[1]));
+  const r = document.documentElement.style; // banner gradient fades to the new team colours
+  if(skip) r.transition = "none"; r.setProperty("--ba", d.c[0]); r.setProperty("--bb", d.c[1]); if(skip){ void document.documentElement.offsetWidth; r.transition = ""; }
+  if(!HOLD) targets(d).forEach(([fl, c]) => skip ? paint(fl, c) : slide(fl, c));
   [0,1].forEach(i => { const dk = fg(d.c[i]) !== "#fff", s = dk ? "../img/vbblk.png" : "../img/vb.png"; // black ball image on yellow-ish teams
     ["v", "ub"].forEach(p => { const e = q(p+i); e.classList.toggle("dk", dk); if(e.getAttribute("src") !== s) e.setAttribute("src", s); }); });
   for(const k of "nbspte"){ font("--f"+k, d["f"+k] || ""); document.documentElement.style.setProperty("--z"+k, (d["z"+k] || 100) / 100); }
   let w = [0,0]; d.sc.forEach((s,i) => { if(i < d.set){ if(s[0] > s[1]) w[0]++; else if(s[1] > s[0]) w[1]++; } });
   [0,1].forEach(i => {
-    set("n"+i, d.t[i]); set("c"+i, d.rec[i] || ""); q("c"+i).style.display = (d.rec[i] || "").trim() ? "" : "none"; roll(q("p"+i), d.sc[d.set][i], skip); roll(q("w"+i), w[i], skip);
-    const dd = q("d"+i); while(dd.children.length < d.tmo) dd.appendChild(document.createElement("i")); while(dd.children.length > d.tmo) dd.lastChild.remove();
-    [...dd.children].forEach((c, k) => c.classList.toggle("u", k < d.to[i])); // used timeouts fade out
-    logo(i, d.logo[i] || "");
-    q("v"+i).classList.toggle("on", d.srv === i && !d.hs);
-  });
-  if(d.now) off = d.now - Date.now(); D = d; tickB(skip);
-  q("tt").style.setProperty("--tc", d.tt == null ? "#888" : d.c[d.tt]); q("tt").style.setProperty("--tf", d.tt == null ? "#fff" : fg(d.c[d.tt])); q("tt").textContent = d.tt == null ? "ไทม์เอาต์" : "ไทม์เอาต์ · " + d.t[d.tt];
-  [0,1].forEach(i => { q("ub"+i).classList.toggle("on", d.srv === i && !d.hs); set("un"+i, d.t[i]); roll(q("up"+i), d.sc[d.set][i], skip); roll(q("uw"+i), w[i], skip); });
-  setMode(d.mode || "g", skip);
-  q("tm").style.display = (d.timer || MV === "t") ? "" : "none";
-  let fz = d.fz; // time to show while paused: the server's value if it sent one, else what this screen was showing
-  if(fz === undefined) fz = T.tid === d.tid ? T.fz : (d.ev === "p" && !skip ? (T.pz ? T.fz : curMs()) : 0);
-  T = { ok: !!d.at, ev: d.ev, tid: d.tid, la: Date.now() - (d.now - d.at), dur: d.dur || 0, fz: fz || 0, pz: false };
-  [...q("h").children].forEach((c, i) => { const s = d.sc[i], show = i <= d.set && (s[0] || s[1] || i < d.set), sum = s[0] + s[1];
-    c.classList.toggle("cur", i === d.set);
-    if(show){ const was = c.style.display === "none"; c.style.display = ""; roll(c, s[0] + " - " + s[1], skip || was, sum >= (hs[i] || 0)); hs[i] = sum;
-      if(was && !skip && !RM) c.animate([{ opacity: 0, transform: "translateY(14px)" }, { opacity: i === d.set ? 1 : .8, transform: "none" }], { duration: 450, easing: EZ }); }
-    else { c.style.display = "none"; hs[i] = 0; } });
-  q("w").style.opacity = 1;
-}
-
-// timer: counts up during a rally, freezes when a team scores, then restarts from 0:00
-setInterval(() => { let m = 0, pz = false;
-  if(T.ok){ const e = Date.now() - T.la;
-    if(T.ev === "p"){ if(e < T.dur){ m = T.fz; pz = true; } else m = e - T.dur; } else m = e; }
-  const s = Math.floor(Math.max(0, m) / 1000);
-  q("tm").textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); T.pz = pz; q("tm").classList.toggle("pz", pz || MV === "t"); tickB(false); }, 100);
-
-render({t:["เหย้า","เยือน"],c:["#ff0033","#19c6ff"],rec:["",""],ml:false,ls:[],wl:[],mode:"g",tt:null,logo:["",""],sc:[[0,0],[0,0],[0,0],[0,0],[0,0]],set:0,to:[0,0],srv:null,hs:false,title:"",timer:true,tmo:2,dur:0,ev:"r",now:0,at:0}, true);
-function conn(){ const ws = new WebSocket(WS);
-  ws.onmessage = e => { const d = JSON.parse(e.data); if(!d.err){ render(d, first); first = false; } };
-  ws.onclose = () => setTimeout(conn, 1000); }
-conn();
-</script></body></html>
+    set("n"+i, d.t[i]); set("c"+i, d.rec[i] || ""); q("c"+i).style.display = (d.rec[i] || "").trim() ? "" : "none"; roll(q("p"+i), d.sc[d.set][
