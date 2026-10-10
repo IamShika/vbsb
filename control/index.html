@@ -29,7 +29,7 @@ summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
  <input id="pi" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" style="width:170px;font-size:34px;text-align:center;letter-spacing:8px"></div>
 <div id="s">กำลังเชื่อมต่อ…</div>
 
-<div class="c"><details open ontoggle="window.fit&&fit()"><summary>ตัวอย่างสกอร์บอร์ด (สดจากหน้าจอจริง)</summary>
+<div class="c"><details open ontoggle="window.prev&&prev(this.open)"><summary>ตัวอย่างสกอร์บอร์ด (สดจากหน้าจอจริง)</summary>
  <div id="pv"><iframe id="pf" src="../display/"></iframe></div></details></div>
 
 <div id="modes"><button data-m="w" onclick="go('w')">วอร์มอัพ / พักเกม</button><button data-m="g" onclick="go('g')">เกม</button><button data-m="t" onclick="go('t')">ไทม์เอาต์</button></div>
@@ -144,6 +144,8 @@ function render(){ [0,1].forEach(i=>{ q("h"+i).textContent=S.t[i]; q("p"+i).text
   q("tth").textContent = S.tt==null ? "เลือกทีมที่ขอไทม์เอาต์" : S.t[S.tt]+" ขอไทม์เอาต์";
   q("tpk").style.display = S.tt==null ? "" : "none"; q("etb").style.display = S.tt==null ? "none" : "";
   view(S.mode || "g"); }
+// the preview is a second copy of the display: unload it while collapsed so it costs the phone nothing
+function prev(on){ const f = q("pf"), s = on ? "../display/" : "about:blank"; if(f.getAttribute("src") !== s) f.setAttribute("src", s); fit(); }
 function fit(){ const w=q("pv"), k=Math.min(1,w.clientWidth/1100); q("pf").style.transform=`scale(${k})`; w.style.height=(210*k)+"px"; }
 addEventListener("resize",fit);
 
