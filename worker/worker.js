@@ -2,10 +2,14 @@
 const pack = s => JSON.stringify({ ...s, now: Date.now() });
 
 export class Board {
-  constructor(ctx, env) { this.c = ctx; this.e = env; }
+  constructor(ctx, env) {
+    this.c = ctx; this.e = env;
+    // "ping" from a screen is answered with "pong" by the runtime itself, without waking this object (free, instant)
+    ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping', 'pong'));
+  }
 
   async fetch(req) {
-    if (req.headers.get('Upgrade') !== 'websocket') return new Response('Durable Object OK v3');
+    if (req.headers.get('Upgrade') !== 'websocket') return new Response('Durable Object OK v4');
     const [client, server] = Object.values(new WebSocketPair());
     this.c.acceptWebSocket(server);
     const s = await this.c.storage.get('s');
