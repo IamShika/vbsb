@@ -231,14 +231,21 @@ async function loadFonts(){ let L;
   const o = '<option value="">ค่าเริ่มต้น</option>' + L.map(n=>`<option value="${n}">${n.replace(/\.(ttf|otf)$/i,"")}</option>`).join("");
   document.querySelectorAll("[data-f]").forEach(e => e.innerHTML = o); fill(); }
 
-function conn(){ ws = new WebSocket(WS);
-  ws.onopen = () => { q("s").textContent="ออนไลน์"; q("s").className="ok"; ws.send(JSON.stringify({key,check:1})); };
-  ws.onclose = () => { q("s").textContent="เชื่อมต่อ "+WS+" ไม่ได้ (กำลังลองใหม่)"; q("s").className=""; setTimeout(conn,1000); };
-  ws.onmessage = e => { const d = JSON.parse(e.data);
+let lastRx = 0, rt;
+function conn(){ clearTimeout(rt);
+  if(ws){ ws.onclose = ws.onmessage = ws.onopen = null; try{ ws.close(); }catch(_){} }
+  const w = ws = new WebSocket(WS); lastRx = Date.now();
+  w.onopen = () => { q("s").textContent="ออนไลน์"; q("s").className="ok"; w.send(JSON.stringify({key,check:1})); };
+  w.onclose = () => { if(ws !== w) return; q("s").textContent="เชื่อมต่อ "+WS+" ไม่ได้ (กำลังลองใหม่)"; q("s").className=""; rt = setTimeout(conn,1000); };
+  w.onmessage = e => { lastRx = Date.now(); if(e.data === "pong") return; let d; try{ d = JSON.parse(e.data); }catch(_){ return; }
     if(d.ok){ if(!got) send(); }
     else if(d.err){ localStorage.removeItem("k"); alert(d.err==2 ? "ลองผิดหลายครั้งเกินไป รอ 1 นาที" : "PIN ไม่ถูกต้อง"); location.reload(); }
     else if(got){ if(d.mode !== S.mode || d.tt !== S.tt){ S.mode=d.mode; S.tt=d.tt; render(); } } // another controller changed the mode
     else { got=1; S={...S,...d}; fill(); render(); } }; }
+// same self-healing as the display: ping the Worker, reconnect when the line has gone quiet
+setInterval(() => { if(!ws || ws.readyState > 1) return;
+  if(Date.now() - lastRx > 40000) conn(); else if(ws.readyState === 1) ws.send("ping"); }, 15000);
+addEventListener("online", () => { if(key && !document.hidden) conn(); });
 fill(); render(); fit(); loadFonts();
 if(key){ q("pin").remove(); conn(); }
 else q("pi").oninput = e => { if(e.target.value.length==4){ key=e.target.value; localStorage.k=key; q("pin").remove(); conn(); } };
