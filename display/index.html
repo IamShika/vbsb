@@ -293,8 +293,18 @@ setInterval(() => { let m = 0, pz = false;
   tickB(false); }, 100);
 
 render({t:["เหย้า","เยือน"],c:["#ff0033","#19c6ff"],rec:["",""],ml:false,ls:[],wl:[],mode:"g",tt:null,logo:["",""],sc:[[0,0],[0,0],[0,0],[0,0],[0,0]],set:0,to:[0,0],srv:null,hs:false,title:"",timer:true,tmo:2,dur:0,ev:"r",now:0,at:0}, true);
-function conn(){ const ws = new WebSocket(WS); first = true; // a fresh connection shows the current state without animating
-  ws.onmessage = e => { const d = JSON.parse(e.data); if(!d.err) recv(d); };
-  ws.onclose = () => setTimeout(conn, 1000); }
+// Connection that heals itself. A phone/IRL Pro can lose the socket without any "close" event (half-open),
+// which is what freezes the board after a quiet intermission. So we ping the Worker and reconnect if nothing comes back.
+let sock, lastRx = 0, rt;
+function conn(){ clearTimeout(rt);
+  if(sock){ sock.onclose = sock.onmessage = null; try{ sock.close(); }catch(_){} }
+  const w = sock = new WebSocket(WS); first = true; lastRx = Date.now(); // a fresh connection shows the current state without animating
+  w.onmessage = e => { lastRx = Date.now(); if(e.data === "pong") return; let d; try{ d = JSON.parse(e.data); }catch(_){ return; } if(!d.err) recv(d); };
+  w.onclose = () => { if(sock === w) rt = setTimeout(conn, 1000); }; }
+function wake(){ if(document.hidden) return; // coming back online / back to the tab: check the line right away
+  if(sock && sock.readyState === 1){ const t = lastRx; sock.send("ping"); setTimeout(() => { if(lastRx === t) conn(); }, 4000); } else conn(); }
+setInterval(() => { if(!sock || sock.readyState > 1) return;
+  if(Date.now() - lastRx > 40000) conn(); else if(sock.readyState === 1) sock.send("ping"); }, 15000);
+addEventListener("online", wake); addEventListener("pageshow", wake); document.addEventListener("visibilitychange", wake);
 conn();
 </script></body></html>
