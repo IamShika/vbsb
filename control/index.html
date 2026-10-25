@@ -13,6 +13,7 @@ button:active{filter:brightness(1.4)}
 input,textarea,select{width:100%;box-sizing:border-box;padding:9px;margin:3px 0;background:#10151f;color:#fff;border:1px solid #334;border-radius:6px;font:inherit}
 textarea{min-height:110px}
 input[type=checkbox]{width:auto}
+.lp{display:flex;gap:8px;align-items:center}.lp img{width:38px;height:38px;object-fit:contain;background:#10151f;border:1px solid #334;border-radius:6px;flex:none;visibility:hidden}.lp img.on{visibility:visible}.lp select{flex:1;min-width:0}
 .n{font-size:44px;text-align:center;font-weight:700}
 .l{text-align:center;color:#9bb}
 summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
@@ -116,7 +117,9 @@ q("teams").innerHTML = [0,1].map(i => `<div class="c"><h3 id="h${i}"></h3>
 q("setup").innerHTML = [0,1].map(i => `<div>ชื่อทีม ${i+1}<input id="t${i}" oninput="S.t[${i}]=this.value;send()">
  สถิติ/อันดับ (เว้นว่างได้)<input id="r${i}" oninput="S.rec[${i}]=this.value;send()">
  สี<div class="cp" id="cp${i}"></div>
- ลิงก์โลโก้<input id="l${i}" placeholder="https://…" oninput="S.logo[${i}]=this.value;send()"></div>`).join("");
+ โลโก้
+ <div class="lp"><img id="lt${i}" alt=""><select id="lp${i}" onchange="pickLogo(${i},this.value)"><option value="">เลือกรูปจากโฟลเดอร์ img…</option></select></div>
+ <input id="l${i}" placeholder="หรือวางลิงก์รูป https://…" oninput="S.logo[${i}]=this.value;send();syncLogo(${i},1)"></div>`).join("");
 document.querySelectorAll(".fc").forEach(e => e.innerHTML = `<div class="c"><h3>ฟอนต์และขนาด</h3>` + [...e.dataset.k].map(k =>
  `<div class="g"><div>${FN[k]}<select data-f="${k}" onchange="S['f${k}']=this.value;send()"></select></div>
   <div>ขนาด (%)<input data-z="${k}" type="number" min="30" max="400" oninput="S['z${k}']=+this.value||100;send()"></div></div>`).join("") + `</div>`);
@@ -207,7 +210,7 @@ function view(m){ if(m === shown) return;
 
 let st; function sendSoon(){ clearTimeout(st); st = setTimeout(send, 300); } // colour picker fires continuously: send once it settles
 function send(){ if(ws&&ws.readyState==1) ws.send(JSON.stringify({key,state:S})); render(); }
-function fill(){ [0,1].forEach(i=>{ q("t"+i).value=S.t[i]; q("r"+i).value=S.rec[i]; PK[i]&&PK[i].ext(S.c[i]); q("l"+i).value=S.logo[i]; });
+function fill(){ [0,1].forEach(i=>{ q("t"+i).value=S.t[i]; q("r"+i).value=S.rec[i]; PK[i]&&PK[i].ext(S.c[i]); q("l"+i).value=S.logo[i]; syncLogo(i); });
   q("tg").checked=S.timer; q("ts").value=S.pz||5; q("tm").value=S.tmo;
   q("ml").checked=S.ml; q("ls").value=S.ls.join("\n"); q("wl").value=S.wl.join("\n"); q("ms").value=S.ms; q("as").checked=S.as;
   document.querySelectorAll("[data-f]").forEach(e=>e.value=S["f"+e.dataset.f]||"");
@@ -231,6 +234,22 @@ async function loadFonts(){ let L;
   const o = '<option value="">ค่าเริ่มต้น</option>' + L.map(n=>`<option value="${n}">${n.replace(/\.(ttf|otf)$/i,"")}</option>`).join("");
   document.querySelectorAll("[data-f]").forEach(e => e.innerHTML = o); fill(); }
 
+// Image picker: lists the repo's /img folder through the GitHub API (cached for offline), picking one fills in its raw link
+let IM = [];
+const esc = t => t.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+async function loadImgs(){ let L;
+  try{ const r = await fetch(`https://api.github.com/repos/${REPO}/contents/img`); L = (await r.json()).filter(f => f.download_url).map(f => [f.name, f.download_url]); localStorage.il = JSON.stringify(L); }
+  catch(e){ try{ L = JSON.parse(localStorage.il || "[]"); }catch(_){ L = []; } }
+  IM = L.filter(([n]) => /\.(png|jpe?g|webp|gif|svg)$/i.test(n) && !/^vb(blk)?\./i.test(n)).sort((a,b) => a[0].localeCompare(b[0])); // vb.png / vbblk.png are the serve ball, not logos
+  const o = '<option value="">เลือกรูปจากโฟลเดอร์ img…</option>' + IM.map(([n,u]) => `<option value="${esc(u)}">${esc(n.replace(/\.[^.]+$/,""))}</option>`).join("");
+  [0,1].forEach(i => { q("lp"+i).innerHTML = o; syncLogo(i); }); }
+function pickLogo(i, u){ if(!u) return; S.logo[i] = u; q("l"+i).value = u; syncLogo(i); send(); }
+const lt = [0, 0];
+function syncLogo(i, typing){ const u = S.logo[i] || "", sel = q("lp"+i), im = q("lt"+i);
+  sel.value = IM.some(x => x[1] === u) ? u : ""; // shows the matching name, or the prompt when the link is custom
+  clearTimeout(lt[i]); lt[i] = setTimeout(() => { // thumbnail waits until typing pauses, so half-typed links don't fire requests
+    if(u){ if(im.getAttribute("src") !== u) im.src = u; im.classList.add("on"); } else { im.removeAttribute("src"); im.classList.remove("on"); } }, typing ? 500 : 0); }
+
 let lastRx = 0, rt;
 function conn(){ clearTimeout(rt);
   if(ws){ ws.onclose = ws.onmessage = ws.onopen = null; try{ ws.close(); }catch(_){} }
@@ -246,7 +265,7 @@ function conn(){ clearTimeout(rt);
 setInterval(() => { if(!ws || ws.readyState > 1) return;
   if(Date.now() - lastRx > 40000) conn(); else if(ws.readyState === 1) ws.send("ping"); }, 15000);
 addEventListener("online", () => { if(key && !document.hidden) conn(); });
-fill(); render(); fit(); loadFonts();
+fill(); render(); fit(); loadFonts(); loadImgs();
 if(key){ q("pin").remove(); conn(); }
 else q("pi").oninput = e => { if(e.target.value.length==4){ key=e.target.value; localStorage.k=key; q("pin").remove(); conn(); } };
 </script></body></html>
