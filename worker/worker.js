@@ -9,7 +9,7 @@ export class Board {
   }
 
   async fetch(req) {
-    if (req.headers.get('Upgrade') !== 'websocket') return new Response('Durable Object OK v4');
+    if (req.headers.get('Upgrade') !== 'websocket') return new Response('Durable Object OK v5');
     const [client, server] = Object.values(new WebSocketPair());
     this.c.acceptWebSocket(server);
     const s = await this.c.storage.get('s');
@@ -55,7 +55,9 @@ export default {
     const test = new URL(req.url).searchParams.has('test');
     if (!ws && !test) return new Response('Volley board is running');
     try {
-      return await env.BOARD.get(env.BOARD.idFromName('main')).fetch(req);
+      // each board name (?b=court2) is its own Durable Object with its own score; no name = the original 'main' board
+      const b = (new URL(req.url).searchParams.get('b') || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 32) || 'main';
+      return await env.BOARD.get(env.BOARD.idFromName(b)).fetch(req);
     } catch (e) {
       return new Response('Error: ' + e.message, { status: 500 });
     }
