@@ -46,9 +46,14 @@ summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
  <h2 style="margin:0">ใส่รหัส PIN</h2>
  <input id="pi" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" style="width:170px;font-size:34px;text-align:center;letter-spacing:8px"></div>
 <div id="s">กำลังเชื่อมต่อ…</div>
+<div class="c"><details id="bd"><summary id="bsum">สนาม / บอร์ด</summary>
+ <select id="bs" onchange="goBoard(this.value)"></select>
+ <div class="g"><input id="bnew" placeholder="ชื่อสนามใหม่ เช่น court2" maxlength="32" autocapitalize="none" autocomplete="off"><button class="x" onclick="goBoard(q('bnew').value,1)">สร้าง / เปิด</button></div>
+ <div class="l" style="margin-top:8px">ลิงก์หน้าจอแสดงผลของสนามนี้ (ใส่ในแอปสตรีม)</div>
+ <input id="bu" readonly onclick="this.select()"><button class="x" id="bcp" onclick="copyU()">คัดลอกลิงก์</button></details></div>
 
 <div class="c"><details open ontoggle="window.prev&&prev(this.open)"><summary>ตัวอย่างสกอร์บอร์ด (สดจากหน้าจอจริง)</summary>
- <div id="pv"><iframe id="pf" src="../display/"></iframe></div></details></div>
+ <div id="pv"><iframe id="pf"></iframe></div></details></div>
 
 <div id="modes"><button data-m="w" onclick="go('w')">วอร์มอัพ / พักเกม</button><button data-m="g" onclick="go('g')">เกม</button><button data-m="t" onclick="go('t')">ไทม์เอาต์</button></div>
 
@@ -99,7 +104,8 @@ summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
 
 <script>onerror=function(m){var s=document.getElementById("s");s.textContent="สคริปต์ผิดพลาด: "+m;s.className="";}</script>
 <script>
-const WS = "wss://volley-board.doramongameing.workers.dev";
+const BD = (new URLSearchParams(location.search).get("b") || "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 32); // which board: ...?b=court2 (none = the original board)
+const WS = "wss://volley-board.doramongameing.workers.dev" + (BD ? "?b=" + BD : "");
 const REPO = "iamshika/vbsb"; // GitHub user/repo that hosts the /fonts folder
 const q = id => document.getElementById(id), EZ = "cubic-bezier(0.109,0.575,0.333,0.974)";
 const FN = { n:"ชื่อทีม", b:"แบนเนอร์", s:"หัวข้อย่อย", p:"คะแนน", t:"ตัวจับเวลา", e:"เซต" };
@@ -223,7 +229,7 @@ function render(){ [0,1].forEach(i=>{ q("h"+i).textContent=S.t[i]; q("p"+i).text
   q("tpk").style.display = S.tt==null ? "" : "none"; q("etb").style.display = S.tt==null ? "none" : "";
   view(S.mode || "g"); }
 // the preview is a second copy of the display: unload it while collapsed so it costs the phone nothing
-function prev(on){ const f = q("pf"), s = on ? "../display/" : "about:blank"; if(f.getAttribute("src") !== s) f.setAttribute("src", s); fit(); }
+function prev(on){ const f = q("pf"), s = on ? "../display/" + (BD ? "?b=" + BD : "") : "about:blank"; if(f.getAttribute("src") !== s) f.setAttribute("src", s); fit(); }
 function fit(){ const w=q("pv"), k=Math.min(1,w.clientWidth/1100); q("pf").style.transform=`scale(${k})`; w.style.height=(210*k)+"px"; }
 addEventListener("resize",fit);
 
@@ -254,8 +260,8 @@ let lastRx = 0, rt;
 function conn(){ clearTimeout(rt);
   if(ws){ ws.onclose = ws.onmessage = ws.onopen = null; try{ ws.close(); }catch(_){} }
   const w = ws = new WebSocket(WS); lastRx = Date.now();
-  w.onopen = () => { q("s").textContent="ออนไลน์"; q("s").className="ok"; w.send(JSON.stringify({key,check:1})); };
-  w.onclose = () => { if(ws !== w) return; q("s").textContent="เชื่อมต่อ "+WS+" ไม่ได้ (กำลังลองใหม่)"; q("s").className=""; rt = setTimeout(conn,1000); };
+  w.onopen = () => { q("s").textContent="ออนไลน์" + (BD ? " · บอร์ด: " + BD : ""); q("s").className="ok"; w.send(JSON.stringify({key,check:1})); };
+  w.onclose = () => { if(ws !== w) return; q("s").textContent="เชื่อมต่อ "+WS.split("?")[0]+" ไม่ได้ (กำลังลองใหม่)"; q("s").className=""; rt = setTimeout(conn,1000); };
   w.onmessage = e => { lastRx = Date.now(); if(e.data === "pong") return; let d; try{ d = JSON.parse(e.data); }catch(_){ return; }
     if(d.ok){ if(!got) send(); }
     else if(d.err){ localStorage.removeItem("k"); alert(d.err==2 ? "ลองผิดหลายครั้งเกินไป รอ 1 นาที" : "PIN ไม่ถูกต้อง"); location.reload(); }
@@ -265,6 +271,20 @@ function conn(){ clearTimeout(rt);
 setInterval(() => { if(!ws || ws.readyState > 1) return;
   if(Date.now() - lastRx > 40000) conn(); else if(ws.readyState === 1) ws.send("ping"); }, 15000);
 addEventListener("online", () => { if(key && !document.hidden) conn(); });
+// Board selector: the boards this device has opened are remembered; picking one reopens the panel on that board
+const cleanB = n => String(n || "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 32);
+function boards(){ let L; try{ L = JSON.parse(localStorage.bl || "[]"); }catch(_){ L = []; } if(!Array.isArray(L)) L = [];
+  L = L.map(cleanB).filter(Boolean); if(BD && !L.includes(BD)) L.push(BD); try{ localStorage.bl = JSON.stringify(L); }catch(_){} return L; }
+function goBoard(n, isNew){ n = cleanB(n); if(isNew && !n){ q("bnew").focus(); return; } if(n === BD){ q("bnew").value = ""; return; }
+  if(n){ const L = boards(); if(!L.includes(n)){ L.push(n); try{ localStorage.bl = JSON.stringify(L); }catch(_){} } }
+  location.href = location.pathname + (n ? "?b=" + n : ""); }
+function dispUrl(){ let u = "../display/"; try{ u = new URL(u, location.href).href; }catch(_){} /* preview windows (blob:/srcdoc) have no real address */ return u + (BD ? "?b=" + BD : ""); }
+function copyU(){ const u = q("bu"), b = q("bcp"), t = b.textContent; u.value = dispUrl();
+  const ok = () => { b.textContent = "คัดลอกแล้ว ✓"; setTimeout(() => b.textContent = t, 1500); };
+  if(navigator.clipboard) navigator.clipboard.writeText(u.value).then(ok, () => { u.select(); document.execCommand("copy"); ok(); });
+  else { u.select(); try{ document.execCommand("copy"); ok(); }catch(_){} } }
+(function(){ q("bs").innerHTML = '<option value="">บอร์ดหลัก (ลิงก์เดิม)</option>' + boards().map(n => `<option value="${n}">${n}</option>`).join("");
+  q("bs").value = BD; q("bu").value = dispUrl(); q("bsum").textContent = "สนาม / บอร์ด: " + (BD || "บอร์ดหลัก"); })();
 fill(); render(); fit(); loadFonts(); loadImgs();
 if(key){ q("pin").remove(); conn(); }
 else q("pi").oninput = e => { if(e.target.value.length==4){ key=e.target.value; localStorage.k=key; q("pin").remove(); conn(); } };
