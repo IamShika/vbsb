@@ -127,7 +127,8 @@ body{text-shadow:none}
 </div>
 </div>
 <script>
-const WS = "wss://volley-board.doramongameing.workers.dev";
+const BD = (new URLSearchParams(location.search).get("b") || "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 32); // which board: ...?b=court2 (none = the original board)
+const WS = "wss://volley-board.doramongameing.workers.dev" + (BD ? "?b=" + BD : "");
 const q = id => document.getElementById(id);
 const EZ = "cubic-bezier(0.109,0.575,0.333,0.974)", RM = matchMedia("(prefers-reduced-motion:reduce)").matches;
 let T = { ok: 0 }, first = true, D = null, off = 0, curB = null, hs = [], LG = ["", ""], FL = {}, M = null, MV = null, TA = null, mt = 0, CB = {};
