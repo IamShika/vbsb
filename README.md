@@ -1,6 +1,6 @@
 ## AN OPEN SOURCE VOLLEYBALL SCOREBOARD ##
-yes, open-sourced. You can steal the Scoreboard and host it on your own. if you know what you were doing though.\
-I will write about how to deploy it for others later. This is still in development, one or more things can change in the future!
+yes, open-sourced. You can steal the Scoreboard and host it on your own. The setup is in the zip file in releases.\
+NO VIRUS! And this is still in development, one or more things can change in the future!
 
 # Comes with :
 • Cool dynamic animations (color swap, Score up, basically almost everything is animated.)\
