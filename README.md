@@ -21,13 +21,12 @@ Can be used in OBS or IRL pro (Android app)\
 or any streaming app that supports web overlays
 
 `recommended resolution is (for smooth streaming) :`
-1. 1100x220
-2. 1280x280
+1. 1100×190
+2. 1430x364
 
 `If you are insane and want sharp resolutions :`
-1. 1650x330
-2. 1920x420 (lmao ik)
-3. 2560x560 (insane 2K idk xddd)
+1. 2200x380
+2. 3300x570
 
 Don't forget to set a custom CSS,\
 Here, Have this code :
