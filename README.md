@@ -35,4 +35,6 @@ one line says it all, It makes the background transparent.\
 
 # How to deploy it for your own Volleyball game!?
 
-I'll write this in soon. Heehee!
+You can find a complete setup in release! v1.0 is the most stable and ready to use!\
+Now you can host your own scoreboard without having to be jealous of mine!\
+Yahoo! :D
