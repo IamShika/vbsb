@@ -77,6 +77,11 @@ summary{cursor:pointer;color:#9bb;padding:2px 0 8px}
   <button class="r" onclick="confirm('รีเซ็ตคะแนน เซต และไทม์เอาต์ทั้งหมด?')&&ra()">รีเซ็ตทั้งหมด</button></div>
   <button class="x" onclick="S.ev='r';S.dur=0;S.tid++;send()">เริ่มจับเวลาใหม่</button></div>
  <div class="c" id="gs"><h3>ตั้งค่า</h3>
+  <div class="l">ทีมที่บันทึกไว้ (เก็บในเครื่องนี้)</div>
+  <select id="pr"></select>
+  <div class="g"><button class="x" onclick="usePre(0)">ใส่เป็นทีม 1</button><button class="x" onclick="usePre(1)">ใส่เป็นทีม 2</button></div>
+  <div class="g"><button class="x" onclick="savePre(0,this)">บันทึกทีม 1</button><button class="x" onclick="savePre(1,this)">บันทึกทีม 2</button></div>
+  <button class="x" onclick="delPre()">ลบทีมที่เลือก</button>
   <div class="g" id="setup"></div>
   <div class="l" style="font-size:12px;margin:4px 0 8px">ช่องสีรับรหัส เช่น #ff0033, rgb(255,0,51), hsl(350,100%,50%) หรือชื่อสี เช่น gold</div>
   <button class="x" onclick="swap()">สลับฝั่ง</button>
@@ -285,7 +290,18 @@ function copyU(){ const u = q("bu"), b = q("bcp"), t = b.textContent; u.value = 
   else { u.select(); try{ document.execCommand("copy"); ok(); }catch(_){} } }
 (function(){ q("bs").innerHTML = '<option value="">บอร์ดหลัก (ลิงก์เดิม)</option>' + boards().map(n => `<option value="${n}">${n}</option>`).join("");
   q("bs").value = BD; q("bu").value = dispUrl(); q("bsum").textContent = "สนาม / บอร์ด: " + (BD || "บอร์ดหลัก"); })();
-fill(); render(); fit(); loadFonts(); loadImgs();
+// Team presets: name + colour + logo, kept on this device. Records are per match, so they are not saved.
+let TP = []; try{ TP = JSON.parse(localStorage.tp || "[]"); if(!Array.isArray(TP)) TP = []; }catch(_){ TP = []; }
+function fillPre(sel){ q("pr").innerHTML = TP.length ? TP.map((p,i) => `<option value="${i}">${esc(p.n)}</option>`).join("") : '<option value="">ยังไม่มีทีมที่บันทึกไว้</option>'; if(sel != null) q("pr").value = sel; }
+function keepPre(sel){ try{ localStorage.tp = JSON.stringify(TP); }catch(_){} fillPre(sel); }
+function savePre(i, b){ const n = S.t[i].trim(); if(!n) return;
+  const p = { n, c:S.c[i], logo:S.logo[i] }, k = TP.findIndex(x => x.n === n); if(k < 0) TP.push(p); else TP[k] = p;
+  keepPre(k < 0 ? TP.length - 1 : k); const t = b.textContent; b.textContent = "บันทึกแล้ว ✓"; setTimeout(() => b.textContent = t, 1500); }
+function usePre(i){ const p = TP[+q("pr").value]; if(!p) return; S.t[i] = p.n; S.c[i] = p.c; S.logo[i] = p.logo || ""; fill(); send(); }
+function delPre(){ const k = +q("pr").value; if(!TP[k] || !confirm("ลบทีม " + TP[k].n + " ออกจากรายการ?")) return; TP.splice(k, 1); keepPre(); }
+fillPre();
+fill(); render(); loadFonts(); loadImgs();
+prev(q("pv").closest("details").open); // load the preview now: the toggle event can fire before this script exists on a slow phone
 if(key){ q("pin").remove(); conn(); }
 else q("pi").oninput = e => { if(e.target.value.length==4){ key=e.target.value; localStorage.k=key; q("pin").remove(); conn(); } };
 </script></body></html>
